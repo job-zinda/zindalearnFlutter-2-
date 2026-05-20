@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zindaonlineschool/screens/auth/login_screen.dart';
+import 'package:zindaonlineschool/screens/dashboard/dashborad_screen.dart';
 import 'package:zindaonlineschool/screens/home/home_screen/home_screen.dart';
 
 
@@ -36,24 +37,21 @@ class _SplashScreenState
 
     if (!mounted) return;
 
-    if (token != null) {
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) =>  HomeScreen(token: token),
-        ),
-      );
-
-    } else {
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const LoginScreen(),
-        ),
-      );
-    }
+ if (token != null) {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (_) => DashboardScreen(token: token),
+    ),
+  );
+} else {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (_) => const LoginScreen(),
+    ),
+  );
+}
   }
 
   @override

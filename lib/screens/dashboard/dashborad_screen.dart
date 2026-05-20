@@ -4,6 +4,7 @@ import 'package:zindaonlineschool/providers/chat_provider.dart';
 import 'package:zindaonlineschool/screens/chat/chat_screen.dart';
 import 'package:zindaonlineschool/screens/home/home_screen/home_screen.dart';
 import 'package:zindaonlineschool/screens/profile/profile_screen.dart';
+import 'package:zindaonlineschool/screens/settings/settings_screen.dart';
 import 'package:zindaonlineschool/screens/tutor/all_tutors_screen.dart';
 import 'package:zindaonlineschool/screens/tutor/tutor_screen.dart';
 import 'package:zindaonlineschool/widgets/custom_bootom_nav.dart';
@@ -104,9 +105,10 @@ TutorsScreen(
         //  roomId: ''
       ),
 
-      ProfileScreen(
-        token: widget.token,
-      ),
+      // ProfileScreen(
+      //   token: widget.token,
+      // ),
+        SettingsScreen(token: widget.token), 
 
     ];
   }

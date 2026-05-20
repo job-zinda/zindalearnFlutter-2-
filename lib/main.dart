@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zindaonlineschool/providers/chat_provider.dart';
 import 'package:zindaonlineschool/providers/course_provider.dart';
+import 'package:zindaonlineschool/providers/feedback_provider.dart';
 import 'package:zindaonlineschool/providers/home_provider.dart';
 import 'package:zindaonlineschool/providers/profile_provider.dart';
 import 'package:zindaonlineschool/providers/review_provider.dart';
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TutorProvider()),
         ChangeNotifierProvider(create: (_) => ReviewProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
+          ChangeNotifierProvider(create: (_) => FeedbackProvider()),
       ],
 
       child: MaterialApp(

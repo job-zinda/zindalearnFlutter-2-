@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zindaonlineschool/providers/course_provider.dart';
+import 'package:zindaonlineschool/providers/feedback_provider.dart';
 
 import 'package:zindaonlineschool/providers/home_provider.dart';
 import 'package:zindaonlineschool/providers/session_provider.dart';
 import 'package:zindaonlineschool/screens/auth/login_screen.dart';
 import 'package:zindaonlineschool/screens/course/course_screen.dart';
 import 'package:zindaonlineschool/screens/session/session_screen.dart';
-
+import 'package:zindaonlineschool/screens/splash/splash_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String token;
@@ -29,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     Future.microtask(() {
       context.read<HomeProvider>().fetchHomeData(widget.token);
+       context.read<FeedbackProvider>().fetchAllFeedback(widget.token);
     });
   }
 
@@ -48,31 +50,29 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
 
         title: const Text(
-          "Zinda",
+          "Zinda Online",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
 
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.logout),
 
-            onPressed: () async {
-              final prefs = await SharedPreferences.getInstance();
+        //     onPressed: () async {
+        //       final prefs = await SharedPreferences.getInstance();
 
-              await prefs.remove("token");
+        //       await prefs.remove("token");
 
-              if (!mounted) return;
+        //       if (!mounted) return;
 
-              Navigator.pushAndRemoveUntil(
-                context,
-
-                MaterialPageRoute(builder: (_) =>  LoginScreen()),
-
-                (route) => false,
-              );
-            },
-          ),
-        ],
+        //       Navigator.pushAndRemoveUntil(
+        //         context,
+        //         MaterialPageRoute(builder: (_) => const LoginScreen()),
+        //         (route) => false,
+        //       );
+        //     },
+        //   ),
+        // ],
       ),
 
       body: provider.isLoading
@@ -121,7 +121,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     SizedBox(height: height * 0.02),
 
-                    _buildFeedbackSection(provider, width, height),
+                    // _buildFeedbackSection(provider, width, height),
+                    _buildFeedbackSection(width, height),
 
                     SizedBox(height: height * 0.04),
                   ],
@@ -393,61 +394,44 @@ class _HomeScreenState extends State<HomeScreen> {
                         //     ),
                         //   );
                         // },
+                        onPressed: () {
+                          if (category.key == "online_tuition") {
+                            Navigator.push(
+                              context,
 
-                         onPressed: () {if (category.key == "online_tuition") {
+                              MaterialPageRoute(
+                                builder: (_) => ChangeNotifierProvider(
+                                  create: (_) => SessionProvider(),
 
-Navigator.push(
+                                  child: SessionScreen(
+                                    categoryId: category.id,
 
+                                    token: widget.token,
+                                  ),
+                                ),
+                              ),
+                            );
+                          } else {
+                            Navigator.push(
+                              context,
 
-context,
+                              MaterialPageRoute(
+                                builder: (_) => ChangeNotifierProvider(
+                                  create: (_) => CourseProvider(),
 
-MaterialPageRoute(
+                                  child: CoursesScreen(
+                                    categoryId: category.id,
 
-  builder: (_) => ChangeNotifierProvider(
+                                    categoryTitle: category.title,
 
-    create: (_) => SessionProvider(),
-
-    child: SessionScreen(
-
-      categoryId: category.id,
-
-      token: widget.token,
-    ),
-  ),
-),
-
-
-);
-
-} else {
-
-Navigator.push(
-
-
-context,
-
-MaterialPageRoute(
-
-  builder: (_) => ChangeNotifierProvider(
-
-    create: (_) => CourseProvider(),
-
-    child: CoursesScreen(
-
-      categoryId: category.id,
-
-      categoryTitle: category.title,
-
-      token: widget.token,
-      sessionType: category.key,
-    ),
-  ),
-),
-
-
-);
-}
-  },
+                                    token: widget.token,
+                                    sessionType: category.key,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                        },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
 
@@ -480,104 +464,97 @@ MaterialPageRoute(
   }
 
   /// FEEDBACK SECTION
-  Widget _buildFeedbackSection(
-    HomeProvider provider,
-    double width,
-    double height,
-  ) {
-    if (provider.feedbacks.isEmpty) {
-      return const Center(
-        child: Text(
+  Widget _buildFeedbackSection(double width, double height) {
+  return Consumer<FeedbackProvider>(
+    builder: (context, provider, child) {
+
+      if (provider.isLoading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      if (provider.allFeedback.isEmpty) {
+        return const Text(
           "No Feedbacks Found",
           style: TextStyle(color: Colors.white),
-        ),
-      );
-    }
+        );
+      }
 
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
 
-      itemCount: provider.feedbacks.length,
+        itemCount: provider.allFeedback.length,
 
-      itemBuilder: (context, index) {
-        final feedback = provider.feedbacks[index];
+        itemBuilder: (context, index) {
+          final item = provider.allFeedback[index];
 
-        return Container(
-          margin: EdgeInsets.only(bottom: height * 0.02),
+          return Container(
+            margin: EdgeInsets.only(bottom: height * 0.02),
 
-          padding: EdgeInsets.all(width * 0.045),
+            padding: EdgeInsets.all(width * 0.045),
 
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-          ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
 
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
 
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: width * 0.065,
-
-                    backgroundColor: const Color(0xFF312E81),
-
-                    child: Text(
-                      feedback.name[0].toUpperCase(),
-
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: const Color(0xFF312E81),
+                      child: Text(
+                        item["name"] != null
+                            ? item["name"][0].toUpperCase()
+                            : "S",
+                        style: const TextStyle(color: Colors.white),
                       ),
                     ),
-                  ),
 
-                  SizedBox(width: width * 0.03),
+                    SizedBox(width: width * 0.03),
 
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-
-                      children: [
-                        Text(
-                          feedback.name,
-
-                          style: TextStyle(
-                            fontSize: width * 0.042,
-                            fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item["name"] ?? "Student",
+                            style: TextStyle(
+                              fontSize: width * 0.042,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
 
-                        SizedBox(height: height * 0.004),
-
-                        Text(
-                          feedback.course,
-
-                          style: TextStyle(color: Colors.grey.shade700),
-                        ),
-                      ],
+                          Text(
+                            item["course"] ?? "",
+                            style: TextStyle(color: Colors.grey.shade700),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: height * 0.02),
-
-              Text(
-                feedback.message,
-
-                style: TextStyle(
-                  fontSize: width * 0.037,
-                  color: Colors.black87,
-                  height: 1.6,
+                  ],
                 ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+
+                SizedBox(height: height * 0.02),
+
+                Text(
+                  item["message"] ?? "",
+                  style: TextStyle(
+                    fontSize: width * 0.037,
+                    color: Colors.black87,
+                    height: 1.6,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
 }
+  }
+

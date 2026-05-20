@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/profile_service.dart';
 
 class ProfileProvider with ChangeNotifier {
@@ -12,6 +13,10 @@ class ProfileProvider with ChangeNotifier {
   Map<String, dynamic>? _profileData;
 
   Map<String, dynamic>? get profileData => _profileData;
+  File? _image;
+File? get image => _image;
+
+final ImagePicker _picker = ImagePicker();
 
   /// GET PROFILE
   Future<(bool, dynamic)> getProfile({
@@ -147,4 +152,57 @@ class ProfileProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+
+  Future<void> pickImageFromGallery() async {
+  final picked = await _picker.pickImage(source: ImageSource.gallery);
+
+  if (picked != null) {
+    _image = File(picked.path);
+    notifyListeners();
+  }
+}
+
+Future<void> pickImageFromCamera() async {
+  final picked = await _picker.pickImage(source: ImageSource.camera);
+
+  if (picked != null) {
+    _image = File(picked.path);
+    notifyListeners();
+  }
+}
+
+Future<(bool, dynamic)> uploadProfileImage({
+  required String token,
+}) async {
+  if (_image == null) {
+    return (false, "No image selected");
+  }
+
+  _isLoading = true;
+  notifyListeners();
+
+  try {
+    final res = await ProfileService.uploadProfilePhoto(
+      token: token,
+      imageFile: _image!,
+    );
+
+    if (res["msg"] != null) {
+      await getProfile(token: token); // 🔥 refresh profile
+      return (true, res["msg"]);
+    }
+
+    return (false, "Upload failed");
+  } catch (e) {
+    return (false, "Error occurred");
+  } finally {
+    _isLoading = false;
+    notifyListeners();
+  }
+}
+
+
+
+
 }

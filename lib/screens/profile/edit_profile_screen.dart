@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../providers/profile_provider.dart';
 
 class EditProfileScreen extends StatefulWidget {
-
   final String token;
   final Map<String, dynamic> profileData;
 
@@ -19,9 +17,7 @@ class EditProfileScreen extends StatefulWidget {
       _EditProfileScreenState();
 }
 
-class _EditProfileScreenState
-    extends State<EditProfileScreen> {
-
+class _EditProfileScreenState extends State<EditProfileScreen> {
   final formKey = GlobalKey<FormState>();
 
   late TextEditingController nameController;
@@ -49,20 +45,21 @@ class _EditProfileScreenState
 
   @override
   Widget build(BuildContext context) {
-
-    final provider =
-        Provider.of<ProfileProvider>(context);
+    final provider = context.watch<ProfileProvider>();
+    final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      backgroundColor: const Color(0xFF0B023D),
 
       appBar: AppBar(
+        backgroundColor: const Color(0xFF0B023D),
+        elevation: 0,
         title: const Text("Edit Profile"),
         centerTitle: true,
       ),
 
       body: SingleChildScrollView(
-
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
 
         child: Form(
           key: formKey,
@@ -70,121 +67,113 @@ class _EditProfileScreenState
           child: Column(
             children: [
 
-              /// PROFILE IMAGE
-              CircleAvatar(
-                radius: 55,
+              const SizedBox(height: 20),
 
-                backgroundImage:
-                    widget.profileData["profile"] != null
-                        ? NetworkImage(
-                            widget.profileData["profile"],
-                          )
-                        : null,
+              /// PROFILE IMAGE (INSTAGRAM STYLE)
+              Stack(
+                alignment: Alignment.bottomRight,
+                children: [
 
-                child:
-                    widget.profileData["profile"] == null
-                        ? const Icon(
-                            Icons.person,
-                            size: 50,
-                          )
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundImage:
+                        widget.profileData["profile"] != null
+                            ? NetworkImage(widget.profileData["profile"])
+                            : null,
+                    child: widget.profileData["profile"] == null
+                        ? const Icon(Icons.person, size: 60)
                         : null,
+                  ),
+
+                  Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.purple,
+                      shape: BoxShape.circle,
+                    ),
+
+                    child: IconButton(
+                      icon: const Icon(Icons.edit,
+                          color: Colors.white, size: 18),
+                      onPressed: () {
+                        // TODO: upload image later
+                      },
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 30),
 
               /// NAME FIELD
-              TextFormField(
+              _buildField(
                 controller: nameController,
-
-                decoration: const InputDecoration(
-                  labelText: "Name",
-                  border: OutlineInputBorder(),
-                ),
-
+                label: "Name",
+                icon: Icons.person,
                 validator: (value) {
-
-                  if (value == null ||
-                      value.trim().isEmpty) {
-
+                  if (value == null || value.trim().isEmpty) {
                     return "Enter name";
                   }
-
                   return null;
                 },
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 15),
 
               /// PHONE FIELD
-              TextFormField(
+              _buildField(
                 controller: phoneController,
-
-                keyboardType: TextInputType.phone,
-
-                decoration: const InputDecoration(
-                  labelText: "Phone",
-                  border: OutlineInputBorder(),
-                ),
-
+                label: "Phone",
+                icon: Icons.phone,
+                keyboard: TextInputType.phone,
                 validator: (value) {
-
-                  if (value == null ||
-                      value.trim().isEmpty) {
-
+                  if (value == null || value.trim().isEmpty) {
                     return "Enter phone";
                   }
-
                   if (value.length < 10) {
                     return "Enter valid phone";
                   }
-
                   return null;
                 },
               ),
 
-              const SizedBox(height: 35),
+              const SizedBox(height: 30),
 
-              /// UPDATE BUTTON
+              /// UPDATE BUTTON (MODERN STYLE)
               SizedBox(
                 width: double.infinity,
-
                 height: 50,
 
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purple,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+onPressed: provider.isLoading
+    ? null
+    : () async {
 
-                  onPressed: provider.isLoading
-                      ? null
-                      : () async {
+        if (!formKey.currentState!.validate()) return;
 
-                          if (!formKey.currentState!
-                              .validate()) {
-                            return;
-                          }
+        final (success, message) =
+            await provider.updateProfile(
+          token: widget.token,
+          name: nameController.text.trim(),
+          phone: phoneController.text.trim(),
+        );
 
-                          final (success, message) =
-                              await provider.updateProfile(
-                            token: widget.token,
-                            name: nameController.text.trim(),
-                            phone:
-                                phoneController.text.trim(),
-                          );
+        if (!context.mounted) return;
 
-                          if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message.toString())),
+        );
 
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                message.toString(),
-                              ),
-                            ),
-                          );
-
-                          if (success) {
-
-                            Navigator.pop(context);
-                          }
-                        },
+        /// 🔥 IMPORTANT FIX
+        if (success) {
+          Navigator.pop(context, true);
+        }
+      },
 
                   child: provider.isLoading
                       ? const CircularProgressIndicator(
@@ -192,6 +181,9 @@ class _EditProfileScreenState
                         )
                       : const Text(
                           "Update Profile",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                 ),
               ),
@@ -199,6 +191,43 @@ class _EditProfileScreenState
           ),
         ),
       ),
+    );
+  }
+
+  /// REUSABLE INPUT FIELD
+  Widget _buildField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType keyboard = TextInputType.text,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboard,
+
+      style: const TextStyle(color: Colors.white),
+
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
+
+        prefixIcon: Icon(icon, color: Colors.white70),
+
+        filled: true,
+        fillColor: Colors.white10,
+
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.white24),
+        ),
+      ),
+
+      validator: validator,
     );
   }
 }
