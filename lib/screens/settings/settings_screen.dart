@@ -1,14 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zindaonlineschool/providers/feedback_provider.dart';
 import 'package:zindaonlineschool/screens/auth/login_screen.dart';
+import 'package:zindaonlineschool/screens/feedback/feedback_scree.dart';
 import 'package:zindaonlineschool/screens/profile/profile_screen.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   final String token;
 
   const SettingsScreen({super.key, required this.token});
 
   @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+context
+    .read<FeedbackProvider>()
+    .fetchMyFeedback(widget.token);    });
+  }
+
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
 
@@ -25,7 +42,6 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
 
         children: [
-
           /// PROFILE CARD ⭐
           _buildCard(
             child: ListTile(
@@ -41,13 +57,16 @@ class SettingsScreen extends StatelessWidget {
                 "View & edit your profile",
                 style: TextStyle(color: Colors.white54),
               ),
-              trailing: const Icon(Icons.arrow_forward_ios,
-                  color: Colors.white54, size: 16),
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.white54,
+                size: 16,
+              ),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => ProfileScreen(token: token),
+                    builder: (_) => ProfileScreen(token: widget.token),
                   ),
                 );
               },
@@ -62,11 +81,48 @@ class SettingsScreen extends StatelessWidget {
           _buildCard(
             child: Column(
               children: [
-
                 _tile(Icons.help, "Help & Support"),
                 const Divider(color: Colors.white10),
 
-                _tile(Icons.feedback, "Feedback"),
+                /// ✅ FEEDBACK SECTION (ADD HERE)
+              Consumer<FeedbackProvider>(
+  builder: (context, provider, child) {
+    return ListTile(
+      leading: const Icon(
+        Icons.feedback,
+        color: Colors.white,
+      ),
+
+      title: const Text(
+        "Feedback",
+        style: TextStyle(
+          color: Colors.white,
+        ),
+      ),
+
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        color: Colors.white54,
+        size: 16,
+      ),
+
+   onTap: () async {
+
+  await context
+      .read<FeedbackProvider>()
+      .fetchMyFeedback(widget.token);
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) =>
+          FeedbackScreen(token: widget.token),
+    ),
+  );
+},
+    );
+  },
+),
               ],
             ),
           ),
@@ -79,7 +135,6 @@ class SettingsScreen extends StatelessWidget {
           _buildCard(
             child: Column(
               children: [
-
                 _tile(Icons.description, "Terms & Conditions"),
                 const Divider(color: Colors.white10),
 
@@ -91,9 +146,7 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           /// ABOUT
-          _buildCard(
-            child: _tile(Icons.info, "About Zinda Learn"),
-          ),
+          _buildCard(child: _tile(Icons.info, "About Zinda Learn")),
 
           const SizedBox(height: 30),
 
@@ -148,10 +201,12 @@ class SettingsScreen extends StatelessWidget {
   Widget _tile(IconData icon, String title) {
     return ListTile(
       leading: Icon(icon, color: Colors.white),
-      title: Text(title,
-          style: const TextStyle(color: Colors.white)),
-      trailing: const Icon(Icons.arrow_forward_ios,
-          color: Colors.white54, size: 16),
+      title: Text(title, style: const TextStyle(color: Colors.white)),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        color: Colors.white54,
+        size: 16,
+      ),
       onTap: () {},
     );
   }

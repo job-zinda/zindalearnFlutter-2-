@@ -1,16 +1,13 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zindaonlineschool/providers/course_provider.dart';
 import 'package:zindaonlineschool/providers/feedback_provider.dart';
 
 import 'package:zindaonlineschool/providers/home_provider.dart';
 import 'package:zindaonlineschool/providers/session_provider.dart';
-import 'package:zindaonlineschool/screens/auth/login_screen.dart';
 import 'package:zindaonlineschool/screens/course/course_screen.dart';
 import 'package:zindaonlineschool/screens/session/session_screen.dart';
-import 'package:zindaonlineschool/screens/splash/splash_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String token;
@@ -30,7 +27,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     Future.microtask(() {
       context.read<HomeProvider>().fetchHomeData(widget.token);
-       context.read<FeedbackProvider>().fetchAllFeedback(widget.token);
+       context
+    .read<FeedbackProvider>()
+    .fetchAllUsersFeedback(widget.token);
     });
   }
 
@@ -122,7 +121,73 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(height: height * 0.02),
 
                     // _buildFeedbackSection(provider, width, height),
-                    _buildFeedbackSection(width, height),
+                    Consumer<FeedbackProvider>(
+  builder: (context, provider, child) {
+
+    if (provider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (provider.allFeedback.isEmpty) {
+      return const Text(
+        "No Feedback Found",
+        style: TextStyle(color: Colors.white),
+      );
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: provider.allFeedback.length,
+
+      itemBuilder: (context, index) {
+        final item = provider.allFeedback[index];
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white10,
+            borderRadius: BorderRadius.circular(15),
+          ),
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+
+              Text(
+                item["studentId"]?["name"] ?? "Student",
+                style: const TextStyle(color: Colors.white,
+                fontWeight: FontWeight.bold),
+              ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                item["message"] ?? "",
+                style: const TextStyle(color: Colors.white70),
+              ),
+
+              const SizedBox(height: 8),
+
+              Row(
+                children: List.generate(5, (i) {
+                  return Icon(
+                    i < (item["rating"] ?? 0)
+                        ? Icons.star
+                        : Icons.star_border,
+                    color: Colors.amber,
+                    size: 16,
+                  );
+                }),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  },
+),
 
                     SizedBox(height: height * 0.04),
                   ],

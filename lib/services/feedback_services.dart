@@ -2,60 +2,155 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class FeedbackService {
-  static const baseUrl = "https://zindalearnbackend.onrender.com/api";
 
-  /// SEND FEEDBACK
-  static Future<Map<String, dynamic>> sendFeedback({
-    required String token,
-    required String message,
-  }) async {
-    final url = Uri.parse("$baseUrl/feedback");
+  static const String baseUrl =
+      "https://zindalearnbackend.onrender.com/api";
 
-    final res = await http.post(
-      url,
+  /// =========================
+  /// SAFE JSON CHECK
+  /// =========================
+  static dynamic _safeDecode(http.Response res) {
+
+    print("STATUS CODE: ${res.statusCode}");
+    print("BODY: ${res.body}");
+
+    /// HTML RESPONSE
+    if (res.body.startsWith("<")) {
+      throw Exception(
+        "Server returned HTML instead of JSON",
+      );
+    }
+
+    return jsonDecode(res.body);
+  }
+
+  /// =========================
+  /// GET ALL USERS FEEDBACK
+  /// =========================
+  static Future<Map<String, dynamic>>
+      getAllUsersFeedback(String token) async {
+
+    final res = await http.get(
+      Uri.parse("$baseUrl/get/feedback/all"),
       headers: {
-        "Content-Type": "application/json",
         "Authorization": "Bearer $token",
       },
+    );
+
+    return _safeDecode(res);
+  }
+
+  /// =========================
+  /// GET MY FEEDBACK
+  /// =========================
+  static Future<Map<String, dynamic>>
+      getMyFeedback(String token) async {
+
+    final res = await http.get(
+      Uri.parse("$baseUrl/feedback/my"),
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    return _safeDecode(res);
+  }
+
+  /// =========================
+  /// SEND FEEDBACK
+  /// =========================
+  static Future sendFeedback({
+    required String token,
+    required String message,
+    required int rating,
+  }) async {
+
+    final res = await http.post(
+      Uri.parse("$baseUrl/feedback"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+
       body: jsonEncode({
         "message": message,
+        "rating": rating,
       }),
     );
 
-    return jsonDecode(res.body);
+    return _safeDecode(res);
   }
 
-  /// MY FEEDBACK
-  static Future<Map<String, dynamic>> getMyFeedback({
-    required String token,
-  }) async {
-    final url = Uri.parse("$baseUrl/feedback/my");
+  /// =========================
+  /// UPDATE FEEDBACK
+  /// =========================
+  /// UPDATE FEEDBACK
+static Future<bool> updateFeedback({
+  required String token,
+  required String id,
+  required String message,
+  required int rating,
+}) async {
 
-    final res = await http.get(
-      url,
+  final url = "https://zindalearnbackend.onrender.com/api/feedback";
+
+  print("UPDATE URL: $url");
+  print("EDIT ID: $id");
+
+  final res = await http.put(
+    Uri.parse(url),
+
+    headers: {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+    },
+
+    body: jsonEncode({
+      "id": id,          // ✅ IMPORTANT: send id in BODY
+      "message": message,
+      "rating": rating,
+    }),
+  );
+
+  print("STATUS: ${res.statusCode}");
+  print("BODY: ${res.body}");
+
+  return res.statusCode == 200;
+}
+  /// =========================
+  /// DELETE FEEDBACK
+  /// =========================
+ static Future<bool> deleteFeedback({
+  required String token,
+  required String id,
+}) async {
+
+  try {
+
+    final response = await http.delete(
+      Uri.parse("$baseUrl/feedback/my"),
+
       headers: {
         "Authorization": "Bearer $token",
       },
     );
 
-    return jsonDecode(res.body);
+    print("DELETE STATUS: ${response.statusCode}");
+    print("DELETE BODY: ${response.body}");
+
+    if (response.statusCode == 200 ||
+        response.statusCode == 201) {
+
+      return true;
+    }
+
+    return false;
+
+  } catch (e) {
+
+    print("DELETE ERROR: $e");
+
+    return false;
   }
-
-  /// ALL FEEDBACK (STUDENTS SAY)
- static Future<Map<String, dynamic>> getAllFeedback(String token) async {
-  final response = await http.get(
-    Uri.parse("https://zindalearnbackend.onrender.com/api/get/feedback/all"),
-
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token", // 🔥 VERY IMPORTANT
-    },
-  );
-
-  print("STATUS CODE: ${response.statusCode}");
-  print("BODY: ${response.body}");
-
-  return jsonDecode(response.body);
 }
 }
-
