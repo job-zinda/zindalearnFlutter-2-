@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:zindaonlineschool/services/home_service.dart';
-
+import 'package:zindaonlineschool/services/chat_service.dart';
 class ChatProvider with ChangeNotifier {
-  final HomeService _service = HomeService();
+  final ChatService _service = ChatService();
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -64,13 +63,100 @@ class ChatProvider with ChangeNotifier {
   }
 
   /// SEND MESSAGE
-  Future<void> sendMessage(
-      String roomId, String message, String token) async {
-    try {
-      await _service.sendMessage(roomId, message, token);
-      await fetchMessages(roomId, token);
-    } catch (e) {
-      debugPrint("Send error: $e");
-    }
+//   Future<void> sendMessage(
+//   String roomId,
+//   String message,
+//   String token,
+// ) async {
+//   try {
+//     await _service.sendMessage(roomId, message, token);
+
+//     final updated = await _service.getMessages(roomId, token);
+
+//     _messages = updated;
+
+//     notifyListeners();
+//   } catch (e) {
+//     debugPrint("Send error: $e");
+//   }
+// }
+
+// Future<void> sendMessage(
+//   String roomId,
+//   String message,
+//   String token,
+// ) async {
+//   try {
+//     await _service.sendMessage(roomId, message, token);
+
+//     ///  FORCE REFRESH AFTER SEND
+//     final updated = await _service.getMessages(roomId, token);
+
+//     _messages = List.from(updated); // IMPORTANT (force rebuild copy)
+
+//     notifyListeners();
+
+//   } catch (e) {
+//     debugPrint("Send error: $e");
+//   }
+// }
+Future<void> sendMessage(
+  String roomId,
+  String message,
+  String token,
+) async {
+  try {
+    await _service.sendMessage(roomId, message, token);
+
+    ///  SMALL DELAY FIX (VERY IMPORTANT IN CHAT APPS)
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    final updated = await _service.getMessages(roomId, token);
+
+    _messages = List.from(updated); //
+    notifyListeners();
+
+  } catch (e) {
+    debugPrint("Send error: $e");
   }
+}
+
+Future<void> editMessage(
+  String messageId,
+  String message,
+  String token,
+  String roomId,
+) async {
+  try {
+    await _service.editMessage(messageId, message, token);
+
+    final updated = await _service.getMessages(roomId, token);
+
+    _messages = updated;
+
+    notifyListeners();
+  } catch (e) {
+    debugPrint("Edit error: $e");
+  }
+}
+
+/// DELETE MESSAGE
+Future<void> deleteMessage(
+  String messageId,
+  String roomId,
+  String token,
+) async {
+  try {
+    await _service.deleteMessage(messageId, token);
+
+    
+    final updated = await _service.getMessages(roomId, token);
+
+    _messages = updated;
+
+    notifyListeners();
+  } catch (e) {
+    debugPrint("Delete error: $e");
+  }
+}
 }

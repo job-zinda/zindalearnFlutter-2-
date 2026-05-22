@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zindaonlineschool/providers/chat_provider.dart';
 import 'package:zindaonlineschool/screens/chat/chat_room_screen.dart';
-import 'package:zindaonlineschool/screens/chat/chat_screen.dart';
 import 'package:zindaonlineschool/screens/contact/contact_screen.dart';
 import 'package:zindaonlineschool/screens/review/review_screen.dart';
 import '../../services/home_service.dart';
@@ -460,61 +459,77 @@ class _TutorDetailsScreenState extends State<TutorDetailsScreen> {
                       ),
 
                       SizedBox(width: width * 0.03),
-                      Expanded(
-                        child: Consumer<ChatProvider>(
-                          builder: (context, provider, child) {
-                            return ElevatedButton(
-                              onPressed: provider.requestSent
-                                  ? null
-                                  : () async {
-                                      final res = await context
-                                          .read<ChatProvider>()
-                                          .connectTutor(
-                                            widget.tutorId,
-                                            widget.token,
-                                          );
+                     Expanded(
+  child: Consumer<ChatProvider>(
+    builder: (context, provider, child) {
 
-                                      if (!mounted) return;
+      // ✅ Check if tutor already has chat room
+      final isRequested = provider.rooms.any((room) {
+        final tutor = room["tutor"] ?? {};
 
-                                      if (res != null && res["room"] != null) {
-                                        final roomId = res["room"]["_id"];
+        return tutor["_id"] == widget.tutorId ||
+               tutor["id"] == widget.tutorId;
+      });
 
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text("Request Sent"),
-                                          ),
-                                        );
+      return ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isRequested ? Colors.grey : Colors.green,
+        ),
+onPressed: () async {
+  final res = await context
+      .read<ChatProvider>()
+      .connectTutor(widget.tutorId, widget.token);
 
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => ChatRoomScreen(
-                                              roomId: roomId,
-                                              token: widget.token,
-                                            ),
-                                          ),
-                                        );
-                                      } else {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text("Failed"),
-                                          ),
-                                        );
-                                      }
-                                    },
-                              child: Text(
-                                provider.requestSent
-                                    ? "Request Sent"
-                                    : "Send Request",
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+  if (!mounted) return;
+
+  if (res == null || res is! Map<String, dynamic>) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Request Failed (no response)")),
+    );
+    return;
+  }
+
+  final roomData = res["room"];
+
+  if (roomData == null || roomData is! Map<String, dynamic>) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Request Failed (no room)")),
+    );
+    return;
+  }
+
+  final roomId = roomData["_id"];
+
+  if (roomId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Room ID missing")),
+    );
+    return;
+  }
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("Request Sent")),
+  );
+
+ Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) => ChatRoomScreen(
+      roomId: roomId,
+      token: widget.token,
+      //  tutor: (tutor is Map<String, dynamic>) ? tutor : {},
+    ),
+  ),
+);
+},
+
+        child: Text(
+          isRequested ? "Request Sent" : "Send Request",
+        ),
+      );
+    },
+  ),
+)
                     ],
                   ),
 

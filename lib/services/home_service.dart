@@ -284,50 +284,6 @@ Future<bool> deleteReview({
 
   return response.statusCode == 200;
 }
-Future connectRequest(String tutorId, String token) async {
-  final url = "$baseUrl/chat/connect-request/$tutorId";
-
-  final res = await http.post(
-    Uri.parse(url),
-    headers: {"Authorization": "Bearer $token"},
-  );
-
-  return jsonDecode(res.body);
-}
-
-Future getChatRooms(String token) async {
-  final res = await http.get(
-    Uri.parse("$baseUrl/chat/rooms"),
-    headers: {"Authorization": "Bearer $token"},
-  );
-
-  return jsonDecode(res.body)["rooms"];
-}
-Future getMessages(String roomId, String token) async {
-  final res = await http.get(
-    Uri.parse("$baseUrl/chat/messages/$roomId"),
-    headers: {
-      "Authorization": "Bearer $token",
-      "Content-Type": "application/json",
-    },
-  );
-
-  if (res.statusCode != 200) {
-    throw Exception("Failed to load messages");
-  }
-
-  return jsonDecode(res.body)["messages"];
-}
-
-Future sendMessage(String roomId, String msg, String token) async {
-  await http.post(
-    Uri.parse("$baseUrl/chat/message/$roomId"),
-    headers: {"Authorization": "Bearer $token"},
-    body: {"message": msg},
-  );
-}
-
-
 
 
 }

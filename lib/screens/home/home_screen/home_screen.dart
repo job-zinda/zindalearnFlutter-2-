@@ -53,25 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
 
-        // actions: [
-        //   IconButton(
-        //     icon: const Icon(Icons.logout),
-
-        //     onPressed: () async {
-        //       final prefs = await SharedPreferences.getInstance();
-
-        //       await prefs.remove("token");
-
-        //       if (!mounted) return;
-
-        //       Navigator.pushAndRemoveUntil(
-        //         context,
-        //         MaterialPageRoute(builder: (_) => const LoginScreen()),
-        //         (route) => false,
-        //       );
-        //     },
-        //   ),
-        // ],
+       
       ),
 
       body: provider.isLoading
@@ -93,9 +75,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
 
                   children: [
-                    _buildSearchBar(),
+                    // _buildSearchBar(),
 
-                    SizedBox(height: height * 0.03),
+                    // SizedBox(height: height * 0.03),
 
                     _buildWelcomeSection(width, height),
 

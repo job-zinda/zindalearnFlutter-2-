@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zindaonlineschool/screens/auth/login_screen.dart';
 import 'package:zindaonlineschool/screens/dashboard/dashborad_screen.dart';
-import 'package:zindaonlineschool/screens/home/home_screen/home_screen.dart';
 
 
 class SplashScreen extends StatefulWidget {
@@ -41,7 +40,7 @@ class _SplashScreenState
   Navigator.pushReplacement(
     context,
     MaterialPageRoute(
-      builder: (_) => DashboardScreen(token: token),
+      builder: (_) => DashboardScreen(token: token, ), 
     ),
   );
 } else {
