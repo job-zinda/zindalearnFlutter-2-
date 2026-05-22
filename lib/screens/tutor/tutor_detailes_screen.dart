@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:zindaonlineschool/providers/chat_provider.dart';
 import 'package:zindaonlineschool/screens/chat/chat_room_screen.dart';
 import 'package:zindaonlineschool/screens/chat/chat_screen.dart';
+import 'package:zindaonlineschool/screens/contact/contact_screen.dart';
 import 'package:zindaonlineschool/screens/review/review_screen.dart';
 import '../../services/home_service.dart';
 
@@ -529,7 +530,14 @@ class _TutorDetailsScreenState extends State<TutorDetailsScreen> {
 
                       color: Colors.green,
 
-                      onTap: () {},
+                      onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const ContactScreen(),
+    ),
+  );
+},
                     ),
                   ),
 
