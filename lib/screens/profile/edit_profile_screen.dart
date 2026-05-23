@@ -74,31 +74,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 alignment: Alignment.bottomRight,
                 children: [
 
-                  CircleAvatar(
-                    radius: 60,
-                    backgroundImage:
-                        widget.profileData["profile"] != null
-                            ? NetworkImage(widget.profileData["profile"])
-                            : null,
-                    child: widget.profileData["profile"] == null
-                        ? const Icon(Icons.person, size: 60)
-                        : null,
-                  ),
+                  // CircleAvatar(
+                  //   radius: 60,
+                  //   backgroundImage:
+                  //       widget.profileData["profile"] != null
+                  //           ? NetworkImage(widget.profileData["profile"])
+                  //           : null,
+                  //   child: widget.profileData["profile"] == null
+                  //       ? const Icon(Icons.person, size: 60)
+                  //       : null,
+                  // ),
 
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.purple,
-                      shape: BoxShape.circle,
-                    ),
+                  // Container(
+                  //   decoration: const BoxDecoration(
+                  //     color: Colors.purple,
+                  //     shape: BoxShape.circle,
+                  //   ),
 
-                    child: IconButton(
-                      icon: const Icon(Icons.edit,
-                          color: Colors.white, size: 18),
-                      onPressed: () {
-                        // TODO: upload image later
-                      },
-                    ),
-                  ),
+                  //   child: IconButton(
+                  //     icon: const Icon(Icons.edit,
+                  //         color: Colors.white, size: 18),
+                  //     onPressed: () {
+                  //       // TODO: upload image later
+                  //     },
+                  //   ),
+                  // ),
                 ],
               ),
 
@@ -169,7 +169,7 @@ onPressed: provider.isLoading
           SnackBar(content: Text(message.toString())),
         );
 
-        /// 🔥 IMPORTANT FIX
+       
         if (success) {
           Navigator.pop(context, true);
         }
