@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zindaonlineschool/providers/chat_provider.dart';
-import 'package:zindaonlineschool/screens/chat/chat_screen.dart';
+import 'package:zindaonlineschool/screens/chat/chat_room_screen.dart';
 import 'package:zindaonlineschool/screens/home/home_screen/home_screen.dart';
 import 'package:zindaonlineschool/screens/settings/settings_screen.dart';
 import 'package:zindaonlineschool/screens/tutor/tutor_screen.dart';
@@ -17,75 +17,22 @@ class DashboardScreen extends StatefulWidget {
   });
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  State<DashboardScreen> createState() =>
+      _DashboardScreenState();
 }
 
-// class _DashboardScreenState extends State<DashboardScreen> {
-
-//   int currentIndex = 0;
-
-//   late final List<Widget> screens;
-
-//   @override
-//   void initState() {
-//     super.initState();
-
-//     screens = [
-
-//       HomeScreen(
-//         token: widget.token,
-//       ),
-
-//       TutorsScreen(
-//         courseId: '',
-//         courseTitle: '',
-//         token: widget.token,
-//       ),
-
-
-//       // ChatScreen(
-//       //   token: widget.token,
-//       // ),
-
-//       ProfileScreen(
-//         token: widget.token,
-//       ),
-
-//     ];
-//   }
-
-//   void changeTab(int index) {
-
-//     setState(() {
-//       currentIndex = index;
-//     });
-
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-
-//     return Scaffold(
-
-//       body: screens[currentIndex],
-
-//       bottomNavigationBar: BottomNavWidget(
-//         currentIndex: currentIndex,
-//         onTap: changeTab,
-//       ),
-
-//     );
-//   }
-// }
-
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState
+    extends State<DashboardScreen> {
 
   int currentIndex = 0;
 
-  late final List<Widget> screens;
+  List<Widget> screens = [];
+
+  String? roomId;
 
   @override
   void initState() {
+
     super.initState();
 
     screens = [
@@ -93,45 +40,89 @@ class _DashboardScreenState extends State<DashboardScreen> {
       HomeScreen(
         token: widget.token,
       ),
-TutorsScreen(
-  courseId: '',   
-  courseTitle: 'All Tutors',
-  token: widget.token,
-),
- ChatScreen(
+
+      TutorsScreen(
+        courseId: '',
+        courseTitle: 'All Tutors',
         token: widget.token,
-          // roomId: ''
       ),
 
-      // ProfileScreen(
-      //   token: widget.token,
-      // ),
-        SettingsScreen(token: widget.token), 
+      const Center(
+        child: CircularProgressIndicator(),
+      ),
 
+      SettingsScreen(
+        token: widget.token,
+      ),
     ];
   }
 
-  void changeTab(int index) {
+  Future<void> changeTab(
+      int index) async {
+
+    /// CHAT TAB
+    if (index == 2) {
+
+      final provider =
+          context.read<ChatProvider>();
+
+      await provider.fetchRooms(
+        widget.token,
+      );
+
+      if (provider.rooms.isNotEmpty) {
+
+        roomId =
+            provider.rooms.first["_id"];
+
+        screens[2] = ChatRoomScreen(
+          roomId: roomId!,
+          token: widget.token,
+        );
+
+        setState(() {
+          currentIndex = 2;
+        });
+
+      } else {
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(
+
+          const SnackBar(
+            content: Text(
+              "No chat rooms found",
+            ),
+          ),
+        );
+      }
+
+      return;
+    }
+
     setState(() {
       currentIndex = index;
     });
-    if (index == 2) {
-    context.read<ChatProvider>().fetchRooms(widget.token);
-  }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+      BuildContext context) {
 
     return Scaffold(
 
-      body: screens[currentIndex],
+      body:
+          screens[currentIndex],
 
-      bottomNavigationBar: BottomNavWidget(
-        currentIndex: currentIndex,
+      bottomNavigationBar:
+          BottomNavWidget(
+
+        currentIndex:
+            currentIndex,
+
         onTap: changeTab,
       ),
-
     );
   }
 }

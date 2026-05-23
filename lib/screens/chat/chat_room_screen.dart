@@ -1,3 +1,5 @@
+
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zindaonlineschool/providers/chat_provider.dart';
@@ -6,11 +8,13 @@ import 'package:zindaonlineschool/widgets/custom_snackbar.dart';
 class ChatRoomScreen extends StatefulWidget {
   final String roomId;
   final String token;
+  final Map<String, dynamic>? tutor;
 
   const ChatRoomScreen({
     super.key,
     required this.roomId,
     required this.token,
+    this.tutor,
   });
 
   @override
@@ -18,253 +22,569 @@ class ChatRoomScreen extends StatefulWidget {
 }
 
 class _ChatRoomScreenState extends State<ChatRoomScreen> {
-  final TextEditingController controller = TextEditingController();
+
+  final TextEditingController controller =
+      TextEditingController();
+
+  final ScrollController scrollController =
+      ScrollController();
 
   String? editingMessageId;
 
-  @override
-  void initState() {
-    super.initState();
+ @override
+void initState() {
 
-    Future.microtask(() {
-      context.read<ChatProvider>().fetchMessages(
-            widget.roomId,
-            widget.token,
-          );
-    });
-  }
+  super.initState();
 
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
+  Future.microtask(() async {
 
-  /// SEND OR UPDATE MESSAGE
-  void handleSend() async {
-    if (controller.text.trim().isEmpty) return;
+    final chat =
+        context.read<ChatProvider>();
 
-    final chat = context.read<ChatProvider>();
+    await chat.fetchMessages(
+      widget.roomId,
+      widget.token,
+    );
 
-    try {
-      if (editingMessageId != null) {
-        await chat.editMessage(
-          editingMessageId!,
-          controller.text,
-          widget.token,
-          widget.roomId,
-        );
+    await chat.markAsRead(
+      widget.roomId,
+      widget.token,
+    );
 
-        CustomSnackbar.success(context, "Message updated");
-        editingMessageId = null;
-      } else {
-        await chat.sendMessage(
-          widget.roomId,
-          controller.text,
-          widget.token,
-        );
-
-        CustomSnackbar.success(context, "Message sent");
-      }
-
-      controller.clear();
-      setState(() {});
-    } catch (e) {
-      CustomSnackbar.error(context, "Something went wrong");
+    if (mounted) {
+      scrollBottom();
     }
-  }
+  });
+}
 
-  /// OPEN OPTIONS (EDIT / DELETE)
-  void showOptions(Map msg) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF1A1F4B),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        return Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit, color: Colors.white),
-              title: const Text("Edit", style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
+  void scrollBottom() {
 
-                setState(() {
-                  editingMessageId = msg["_id"];
-                  controller.text = msg["text"] ?? "";
-                });
-              },
+    Future.delayed(
+      const Duration(milliseconds: 200),
+      () {
+
+        if (scrollController.hasClients) {
+
+          scrollController.animateTo(
+            scrollController.position.maxScrollExtent,
+            duration: const Duration(
+              milliseconds: 300,
             ),
-
-            ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text("Delete", style: TextStyle(color: Colors.red)),
-              onTap: () async {
-                Navigator.pop(context);
-
-                await context.read<ChatProvider>().deleteMessage(
-                      msg["_id"],
-                      widget.roomId,
-                      widget.token,
-                    );
-
-                CustomSnackbar.success(context, "Message deleted");
-              },
-            ),
-          ],
-        );
+            curve: Curves.easeOut,
+          );
+        }
       },
     );
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    scrollController.dispose();
+    super.dispose();
+  }
+Future<void> handleSend() async {
+  if (controller.text.trim().isEmpty) return;
+
+  final chat = context.read<ChatProvider>();
+
+  final text = controller.text.trim();
+  controller.clear();
+
+  try {
+    if (editingMessageId != null) {
+      await chat.editMessage(
+        editingMessageId!,
+        text,
+        widget.token,
+        widget.roomId,
+      );
+
+      editingMessageId = null;
+    } else {
+      await chat.sendMessage(
+        widget.roomId,
+        text,
+        widget.token,
+      );
+    }
+
+    scrollBottom();
+  } catch (e) {
+    debugPrint("Send error: $e");
+  }
+}
+//  Future<void> handleSend() async {
+//   final text = controller.text;
+
+//   print("RAW TEXT: '$text'");
+
+//   final trimmed = text.trim();
+
+//   print("TRIMMED: '$trimmed'");
+
+//   if (trimmed.isEmpty) {
+//     print("BLOCKED: empty message");
+//     return;
+//   }
+
+//   controller.clear();
+
+//   final chat = context.read<ChatProvider>();
+
+//   await chat.sendMessage(widget.roomId, trimmed, widget.token);
+// }
+
+
+
+
+  Widget buildTutorRequestCard(Map msg) {
+
+  final card = msg["connectCard"] ?? {};
+
+  final isMe =
+      msg["senderId"] is Map &&
+      msg["senderId"]["role"] == "student";
+
+  return Align(
+    alignment:
+        isMe
+            ? Alignment.centerRight
+            : Alignment.centerLeft,
+
+    child: Container(
+
+      margin: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 8,
+      ),
+
+      padding: const EdgeInsets.all(14),
+
+      decoration: BoxDecoration(
+        color: Colors.deepPurple,
+        borderRadius:
+            BorderRadius.circular(20),
+      ),
+
+      child: Column(
+
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+
+        children: [
+
+          Row(
+            children: [
+
+              CircleAvatar(
+                radius: 30,
+
+                backgroundImage:
+                    card["image"] != null
+                    ? NetworkImage(
+                        card["image"],
+                      )
+                    : null,
+              ),
+
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Column(
+
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+
+                  children: [
+
+                    Text(
+                      card["name"] ?? "",
+
+                      style:
+                          const TextStyle(
+                        color: Colors.white,
+                        fontWeight:
+                            FontWeight.bold,
+                        fontSize: 17,
+                      ),
+                    ),
+
+                    Text(
+                      card["qualification"] ?? "",
+
+                      style:
+                          const TextStyle(
+                        color:
+                            Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            msg["text"] ?? "",
+
+            style: const TextStyle(
+              color: Colors.white,
+            ),
+          ),
+
+          /// ACTION ICONS BACK
+          if (isMe)
+
+            Row(
+
+              mainAxisSize:
+                  MainAxisSize.min,
+
+              children: [
+
+                /// EDIT
+                IconButton(
+                  icon: const Icon(
+                    Icons.edit,
+                    color: Colors.white70,
+                    size: 18,
+                  ),
+
+                  onPressed: () {
+
+                    setState(() {
+
+                      editingMessageId =
+                          msg["_id"];
+
+                      controller.text =
+                          msg["text"] ?? "";
+                    });
+                  },
+                ),
+
+                /// DELETE
+                IconButton(
+                  icon: const Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                    size: 18,
+                  ),
+
+                  onPressed: () async {
+
+                    await context
+                        .read<ChatProvider>()
+                        .deleteMessage(
+                          msg["_id"],
+                          widget.roomId,
+                          widget.token,
+                        );
+
+                    if (mounted) {
+
+                      CustomSnackbar.success(
+                        context,
+                        "Deleted",
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+        ],
+      ),
+    ),
+  );
+}
+
+  Widget buildNormalMessage(Map msg) {
+
+    final isMe =
+        msg["senderId"] is Map &&
+        msg["senderId"]["role"] ==
+            "student";
+
+    return Align(
+
+      alignment:
+          isMe
+          ? Alignment.centerRight
+          : Alignment.centerLeft,
+
+      child: Container(
+
+        margin:
+            const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 6,
+        ),
+
+        padding:
+            const EdgeInsets.all(12),
+
+        constraints: BoxConstraints(
+          maxWidth:
+              MediaQuery.of(context)
+                      .size
+                      .width *
+                  0.75,
+        ),
+
+        decoration: BoxDecoration(
+
+          color:
+              isMe
+              ? Colors.blueAccent
+              : Colors.white10,
+
+          borderRadius:
+              BorderRadius.circular(
+            16,
+          ),
+        ),
+
+        child: Column(
+
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+
+          children: [
+
+            Text(
+
+              (msg["text"] ??
+                      msg["message"] ??
+                      "")
+                  .toString(),
+
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+              ),
+            ),const SizedBox(height: 6),
+
+if (isMe)
+
+Align(
+
+  alignment:
+      Alignment.centerRight,
+
+  child: Text(
+
+    msg["isRead"] == true
+        ? "Seen"
+        : "Delivered",
+
+    style: TextStyle(
+
+      color:
+          msg["isRead"] == true
+              ? Colors.greenAccent
+              : Colors.white54,
+
+      fontSize: 11,
+    ),
+  ),
+),
+
+            if (isMe)
+
+              Row(
+
+                mainAxisSize:
+                    MainAxisSize.min,
+
+                children: [
+
+                  IconButton(
+                    icon: const Icon(
+                      Icons.edit,
+                      size: 18,
+                      color:
+                          Colors.white70,
+                    ),
+
+                    onPressed: () {
+
+                      setState(() {
+
+                        editingMessageId =
+                            msg["_id"];
+
+                        controller.text =
+                            (msg["text"] ??
+                                    msg["message"] ??
+                                    "")
+                                .toString();
+                      });
+                    },
+                  ),
+
+                  IconButton(
+                    icon: const Icon(
+                      Icons.delete,
+                      size: 18,
+                      color: Colors.red,
+                    ),
+
+                    onPressed: () async {
+
+                      await context
+                          .read<
+                              ChatProvider>()
+                          .deleteMessage(
+                            msg["_id"],
+                            widget.roomId,
+                            widget.token,
+                          );
+
+                      CustomSnackbar
+                          .success(
+                        context,
+                        "Deleted",
+                      );
+                    },
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final provider = context.watch<ChatProvider>();
+
+    final provider =
+        context.watch<ChatProvider>();
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: const Color(0xFF0B023D),
+
+      backgroundColor:
+          const Color(0xFF0B023D),
 
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0B023D),
+
+        backgroundColor:
+            const Color(0xFF0B023D),
+
         title: const Text("Chat"),
       ),
 
       body: Column(
+
         children: [
 
-          /// MESSAGES LIST
           Expanded(
+
             child: ListView.builder(
-              itemCount: provider.messages.length,
-              itemBuilder: (context, index) {
-                final msg = provider.messages[index];
 
-                final isMe = msg["sender"] == "student";
+              controller:
+                  scrollController,
 
-                return Align(
-                  alignment:
-                      isMe ? Alignment.centerRight : Alignment.centerLeft,
+              itemCount:
+                  provider.messages.length,
 
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
-                    padding: const EdgeInsets.all(12),
+              itemBuilder:
+                  (context, index) {
 
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width * 0.75,
-                    ),
+                final msg =
+                    provider.messages[index];
 
-                    decoration: BoxDecoration(
-                      color: isMe
-                          ? Colors.blueAccent
-                          : Colors.white10,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                  if (msg == null || msg is! Map) {
+    return const SizedBox.shrink();
+  }   
 
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                final type =
+                    msg["messageType"] ??
+                        "text";
 
-                        /// MESSAGE TEXT
-                        Text(
-                          msg["text"] ?? "",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                          ),
-                        ),
+                if (type ==
+                    "connect_card") {
 
-                        const SizedBox(height: 5),
+                  return buildTutorRequestCard(
+                    msg,
+                  );
+                }
 
-                        /// ACTION ROW (EDIT + DELETE BUTTONS)
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-
-                            /// ✏️ EDIT BUTTON
-                            IconButton(
-                              icon: const Icon(
-                                Icons.edit,
-                                size: 18,
-                                color: Colors.white70,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  editingMessageId = msg["_id"];
-                                  controller.text = msg["text"] ?? "";
-                                });
-                              },
-                            ),
-
-                            /// 🗑 DELETE BUTTON
-                            IconButton(
-                              icon: const Icon(
-                                Icons.delete,
-                                size: 18,
-                                color: Colors.red,
-                              ),
-                              onPressed: () async {
-                                await context
-                                    .read<ChatProvider>()
-                                    .deleteMessage(
-                                      msg["_id"],
-                                      widget.roomId,
-                                      widget.token,
-                                    );
-
-                                CustomSnackbar.success(
-                                    context, "Deleted");
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                return buildNormalMessage(
+                  msg,
                 );
               },
             ),
           ),
 
-          /// INPUT BOX (SEND / UPDATE)
           Container(
+
             padding: EdgeInsets.only(
               left: 10,
               right: 10,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 10,
               top: 5,
+              bottom:
+                  MediaQuery.of(
+                    context,
+                  ).viewInsets.bottom +
+                  10,
             ),
 
             child: Row(
+
               children: [
 
-                /// TEXT FIELD
                 Expanded(
                   child: TextField(
-                    controller: controller,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: editingMessageId != null
-                          ? "Edit message..."
-                          : "Type message...",
-                      hintStyle: const TextStyle(color: Colors.white54),
-                      border: InputBorder.none,
+
+                    controller:
+                        controller,
+
+                    style:
+                        const TextStyle(
+                      color:
+                          Colors.white,
+                    ),
+
+                    decoration:
+                        InputDecoration(
+
+                      hintText:
+                          editingMessageId !=
+                                  null
+                              ? "Edit message..."
+                              : "Type message...",
+
+                      hintStyle:
+                          const TextStyle(
+                        color:
+                            Colors.white54,
+                      ),
+
+                      border:
+                          InputBorder.none,
                     ),
                   ),
                 ),
 
-                /// SEND / UPDATE BUTTON
                 IconButton(
+
                   icon: Icon(
-                    editingMessageId != null
-                        ? Icons.check_circle
+
+                    editingMessageId !=
+                            null
+                        ? Icons
+                            .check_circle
                         : Icons.send,
+
                     color: Colors.white,
                   ),
-                  onPressed: handleSend,
+
+                  onPressed:
+                      handleSend,
                 ),
               ],
             ),

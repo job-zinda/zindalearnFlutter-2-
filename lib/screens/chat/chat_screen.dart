@@ -59,6 +59,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         builder: (_) => ChatRoomScreen(
                           roomId: room["_id"],
                           token: widget.token,
+  tutor: room["tutor"],
                         ),
                       ),
                     );

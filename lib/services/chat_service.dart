@@ -35,13 +35,51 @@ class ChatService {
   }
 
   /// SEND MESSAGE
-  Future sendMessage(String roomId, String msg, String token) async {
-    await http.post(
-      Uri.parse("$baseUrl/chat/message/$roomId"),
-      headers: {"Authorization": "Bearer $token"},
-      body: {"message": msg},
-    );
-  }
+  // Future sendMessage(String roomId, String msg, String token) async {
+  //   await http.post(
+  //     Uri.parse("$baseUrl/chat/message/$roomId"),
+  //     headers: {"Authorization": "Bearer $token"},
+  //     body: {"message": msg},
+  //   );
+  // }
+  Future sendMessage(
+    String roomId,
+    String msg,
+    String token,
+) async {
+
+  final res = await http.post(
+
+    Uri.parse(
+      "$baseUrl/chat/message/$roomId",
+    ),
+
+    headers: {
+
+      "Authorization":
+          "Bearer $token",
+
+      "Content-Type":
+          "application/json",
+    },
+
+    body: jsonEncode({
+
+      "text": msg,
+
+      // OR use "message"
+      // if backend expects that
+    }),
+  );
+
+  print(
+    "SEND STATUS: ${res.statusCode}",
+  );
+
+  print(
+    "SEND BODY: ${res.body}",
+  );
+}
 
   /// MARK AS READ
   Future markAsRead(String roomId, String token) async {

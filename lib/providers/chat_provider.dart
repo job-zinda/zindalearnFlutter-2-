@@ -159,4 +159,26 @@ Future<void> deleteMessage(
     debugPrint("Delete error: $e");
   }
 }
+// Future<void> markAsRead(String roomId, String token) async {
+//   try {
+//     await _service.markAsRead(roomId, token);
+//   } catch (e) {
+//     debugPrint("Mark read error: $e");
+//   }
+// }
+Future<void> markAsRead(
+  String roomId,
+  String token,
+) async {
+  try {
+    await _service.markAsRead(
+      roomId,
+      token,
+    );
+  } catch (e) {
+    debugPrint(
+      "Read error: $e",
+    );
+  }
+}
 }

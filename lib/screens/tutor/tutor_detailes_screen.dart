@@ -9,6 +9,7 @@ import '../../services/home_service.dart';
 class TutorDetailsScreen extends StatefulWidget {
   final String tutorId;
   final String token;
+  
 
   const TutorDetailsScreen({
     super.key,
@@ -40,7 +41,7 @@ class _TutorDetailsScreenState extends State<TutorDetailsScreen> {
       setState(() {
         tutor = data;
 
-        // 👇 ADD THIS LINE HERE
+        
         print("TUTOR DATA: $data");
         print("RATING FROM API: ${data["rating"]}");
       });
@@ -463,7 +464,7 @@ class _TutorDetailsScreenState extends State<TutorDetailsScreen> {
   child: Consumer<ChatProvider>(
     builder: (context, provider, child) {
 
-      // ✅ Check if tutor already has chat room
+      
       final isRequested = provider.rooms.any((room) {
         final tutor = room["tutor"] ?? {};
 
@@ -475,52 +476,113 @@ class _TutorDetailsScreenState extends State<TutorDetailsScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: isRequested ? Colors.grey : Colors.green,
         ),
+// onPressed: () async {
+//   final res = await context
+//       .read<ChatProvider>()
+//       .connectTutor(widget.tutorId, widget.token);
+
+//   if (!mounted) return;
+
+//   if (res == null || res is! Map<String, dynamic>) {
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       const SnackBar(content: Text("Request Failed (no response)")),
+//     );
+//     return;
+//   }
+
+//   final roomData = res["room"];
+
+//   if (roomData == null || roomData is! Map<String, dynamic>) {
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       const SnackBar(content: Text("Request Failed (no room)")),
+//     );
+//     return;
+//   }
+
+//   final roomId = roomData["_id"];
+
+//   if (roomId == null) {
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       const SnackBar(content: Text("Room ID missing")),
+//     );
+//     return;
+//   }
+
+//   ScaffoldMessenger.of(context).showSnackBar(
+//     const SnackBar(content: Text("Request Sent")),
+//   );
+
+
+// Navigator.push(
+//   context,
+//   MaterialPageRoute(
+//     builder: (_) => ChatRoomScreen(
+//       roomId: roomId,
+//       token: widget.token,
+
+//       tutor: {
+//         "_id": tutor!["_id"],
+//         "name": tutor!["name"],
+//         "photo": tutor!["photo"],
+//         "qualification": tutor!["qualification"],
+//       },
+//     ),
+//   ),
+// );
+// },
+
 onPressed: () async {
-  final res = await context
-      .read<ChatProvider>()
-      .connectTutor(widget.tutorId, widget.token);
+  final chatProvider = context.read<ChatProvider>();
+
+  final res = await chatProvider.connectTutor(
+    widget.tutorId,
+    widget.token,
+  );
 
   if (!mounted) return;
 
   if (res == null || res is! Map<String, dynamic>) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Request Failed (no response)")),
+      const SnackBar(content: Text("Request Failed")),
     );
     return;
   }
 
-  final roomData = res["room"];
+  final room = res["room"];
 
-  if (roomData == null || roomData is! Map<String, dynamic>) {
+  if (room == null || room["_id"] == null) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Request Failed (no room)")),
+      const SnackBar(content: Text("Room not created")),
     );
     return;
   }
 
-  final roomId = roomData["_id"];
+  final roomId = room["_id"];
 
-  if (roomId == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Room ID missing")),
-    );
-    return;
-  }
+  /// ✅ IMPORTANT: refresh rooms before navigation (fix UI state)
+  await chatProvider.fetchRooms(widget.token);
+
+  if (!mounted) return;
 
   ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text("Request Sent")),
+    const SnackBar(content: Text("Request Sent Successfully")),
   );
 
- Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (_) => ChatRoomScreen(
-      roomId: roomId,
-      token: widget.token,
-      //  tutor: (tutor is Map<String, dynamic>) ? tutor : {},
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (_) => ChatRoomScreen(
+        roomId: roomId,
+        token: widget.token,
+        tutor: {
+          "_id": widget.tutorId,
+          "name": tutor?["name"] ?? "",
+          "photo": tutor?["photo"] ?? "",
+          "qualification": tutor?["qualification"] ?? "",
+        },
+      ),
     ),
-  ),
-);
+  );
 },
 
         child: Text(
