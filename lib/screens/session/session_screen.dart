@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zindaonlineschool/providers/session_provider.dart';
+import 'package:zindaonlineschool/core/utils/responsive.dart';
 import 'package:zindaonlineschool/screens/course/course_screen.dart';
+import 'package:zindaonlineschool/widgets/responsive_body.dart';
 
 class SessionScreen extends StatefulWidget {
 
@@ -40,11 +42,8 @@ class _SessionScreenState
     final provider =
         context.watch<SessionProvider>();
 
-    final width =
-        MediaQuery.of(context).size.width;
-
-    final height =
-        MediaQuery.of(context).size.height;
+    final width = Responsive.contentWidth(context);
+    final height = Responsive.height(context);
 
     return Scaffold(
 
@@ -83,12 +82,10 @@ class _SessionScreenState
                   ),
                 )
 
-              : ListView.builder(
-
-                  padding:
-                      EdgeInsets.all(
-                    width * 0.04,
-                  ),
+              : ResponsiveBody(
+                  padding: EdgeInsets.zero,
+                  child: ListView.builder(
+                  padding: Responsive.screenPadding(context),
 
                   itemCount:
                       provider.sessions.length,
@@ -304,6 +301,7 @@ class _SessionScreenState
                       ),
                     );
                   },
+                ),
                 ),
     );
   }

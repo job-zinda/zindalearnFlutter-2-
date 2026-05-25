@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zindaonlineschool/screens/tutor/tutor_screen.dart';
 
+import '../../core/utils/responsive.dart';
+import '../../models/course_model.dart';
 import '../../providers/course_provider.dart';
+import '../../widgets/cached_app_image.dart';
+import '../../widgets/responsive_body.dart';
 
 class CoursesScreen extends StatefulWidget {
   final String categoryId;
@@ -52,10 +56,6 @@ class _CoursesScreenState extends State<CoursesScreen> {
       return course.sectionType == widget.sessionType;
     }).toList();
 
-    final width = MediaQuery.of(context).size.width;
-
-    final height = MediaQuery.of(context).size.height;
-
     return Scaffold(
       backgroundColor: const Color(0xFF0B023D),
 
@@ -79,178 +79,154 @@ class _CoursesScreenState extends State<CoursesScreen> {
                 style: TextStyle(color: Colors.white),
               ),
             )
-          : ListView.builder(
-              padding: EdgeInsets.all(width * 0.04),
-
-              // itemCount: provider.courses.length,
-              itemCount: filteredCourses.length,
-
-              itemBuilder: (context, index) {
-                // final course = provider.courses[index];
-                final course = filteredCourses[index];
-
-                return Container(
-                  margin: EdgeInsets.only(bottom: height * 0.025),
-
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF1A145F), Color(0xFF241B7A)],
-
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-
-                    borderRadius: BorderRadius.circular(28),
-
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.22),
-
-                        blurRadius: 14,
-
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-
-                  child: Padding(
-                    padding: EdgeInsets.all(width * 0.045),
-
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-
-                      children: [
-                        /// IMAGE
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-
-                            border: Border.all(color: Colors.white24, width: 3),
-                          ),
-
-                          child: CircleAvatar(
-                            radius: width * 0.16,
-
-                            backgroundColor: Colors.white,
-
-                            backgroundImage: course.image.isNotEmpty
-                                ? NetworkImage(course.image)
-                                : null,
-
-                            child: course.image.isEmpty
-                                ? const Icon(
-                                    Icons.school,
-                                    size: 42,
-                                    color: Colors.grey,
-                                  )
-                                : null,
-                          ),
-                        ),
-
-                        SizedBox(height: height * 0.022),
-
-                        /// TITLE
-                        Text(
-                          course.title,
-
-                          textAlign: TextAlign.center,
-
-                          style: TextStyle(
-                            color: Colors.white,
-
-                            fontSize: width * 0.05,
-
-                            fontWeight: FontWeight.bold,
-
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-
-                        SizedBox(height: height * 0.015),
-
-                        /// DESCRIPTION
-                        Text(
-                          course.description.isNotEmpty
-                              ? course.description
-                              : "Professional course available for students.",
-
-                          textAlign: TextAlign.center,
-
-                          style: TextStyle(
-                            color: Colors.white70,
-
-                            fontSize: width * 0.034,
-
-                            height: 1.7,
-                          ),
-                        ),
-
-                        SizedBox(height: height * 0.03),
-
-                        /// BUTTON
-                        SizedBox(
-                          width: double.infinity,
-
-                          height: height * 0.06,
-
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF6C63FF),
-
-                              foregroundColor: Colors.white,
-
-                              elevation: 0,
-
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                            ),
-
-                            onPressed: () {
-                              // Navigator.push(
-                              //   context,
-
-                              //   MaterialPageRoute(
-                              //     builder: (_) => TutorsScreen(
-                              //       courseId: course.id,
-
-                              //       courseTitle: course.title,
-
-                              //       token: widget.token,
-                              //     ),
-                              //   ),
-                              // );
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => TutorsScreen(
-                                    courseId: course.id,
-                                    courseTitle: course.title,
-                                    token: widget.token,
-                                  ),
-                                ),
-                              );
-                            },
-
-                            icon: const Icon(Icons.person_search),
-
-                            label: Text(
-                              "View Tutors",
-
-                              style: TextStyle(
-                                fontSize: width * 0.038,
-
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+          : ResponsiveBody(
+              padding: EdgeInsets.zero,
+              child: _buildCoursesList(context, filteredCourses),
             ),
+    );
+  }
+
+  Widget _buildCoursesList(BuildContext context, List<CourseModel> courses) {
+    final columns = Responsive.gridColumns(context);
+    final padding = Responsive.screenPadding(context);
+
+    if (columns == 1) {
+      return ListView.separated(
+        padding: padding,
+        itemCount: courses.length,
+        separatorBuilder: (_, __) =>
+            SizedBox(height: Responsive.spacing(context, 0.025)),
+        itemBuilder: (context, index) => _buildCourseCard(context, courses[index]),
+      );
+    }
+
+    return GridView.builder(
+      padding: padding,
+      itemCount: courses.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columns,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: Responsive.value(
+          context,
+          mobile: 0.8,
+          tablet: 0.68,
+          desktop: 0.72,
+        ),
+      ),
+      itemBuilder: (context, index) => _buildCourseCard(context, courses[index]),
+    );
+  }
+
+  Widget _buildCourseCard(BuildContext context, CourseModel course) {
+    final isGrid = Responsive.gridColumns(context) > 1;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardW = constraints.maxWidth;
+        final imageSize = isGrid ? 56.0 : (cardW * 0.28).clamp(48.0, 90.0);
+        final titleSize = isGrid ? 15.0 : (cardW * 0.05).clamp(14.0, 20.0);
+        final bodySize = isGrid ? 12.0 : (cardW * 0.034).clamp(11.0, 15.0);
+
+        return Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF1A145F), Color(0xFF241B7A)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.22),
+                blurRadius: 14,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(cardW * 0.045),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ClipOval(
+                  child: SizedBox(
+                    width: imageSize,
+                    height: imageSize,
+                    child: course.image.isNotEmpty
+                        ? CachedAppImage(url: course.image, fit: BoxFit.cover)
+                        : ColoredBox(
+                            color: Colors.white,
+                            child: Icon(Icons.school, size: imageSize * 0.5, color: Colors.grey),
+                          ),
+                  ),
+                ),
+                SizedBox(height: Responsive.spacing(context, 0.015)),
+                Text(
+                  course.title,
+                  textAlign: TextAlign.center,
+                  maxLines: isGrid ? 2 : 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: titleSize,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: Responsive.spacing(context, 0.01)),
+                Text(
+                  course.description.isNotEmpty
+                      ? course.description
+                      : 'Professional course available for students.',
+                  textAlign: TextAlign.center,
+                  maxLines: isGrid ? 3 : 5,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: bodySize,
+                    height: 1.5,
+                  ),
+                ),
+                SizedBox(height: Responsive.spacing(context, 0.015)),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF6C63FF),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => TutorsScreen(
+                            courseId: course.id,
+                            courseTitle: course.title,
+                            token: widget.token,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.person_search, size: 18),
+                    label: Text(
+                      'View Tutors',
+                      style: TextStyle(
+                        fontSize: isGrid ? 12 : bodySize + 1,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

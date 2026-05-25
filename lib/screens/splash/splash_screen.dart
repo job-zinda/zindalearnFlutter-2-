@@ -3,19 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zindaonlineschool/screens/auth/login_screen.dart';
 import 'package:zindaonlineschool/screens/dashboard/dashborad_screen.dart';
-
+import 'package:zindaonlineschool/core/utils/responsive.dart';
+import 'package:zindaonlineschool/widgets/responsive_body.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() =>
-      _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState
-    extends State<SplashScreen> {
-
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
@@ -23,61 +21,82 @@ class _SplashScreenState
   }
 
   Future<void> checkLogin() async {
-
-    await Future.delayed(
-      const Duration(seconds: 2),
-    );
-
-    final prefs =
-        await SharedPreferences.getInstance();
-
-    final token =
-        prefs.getString("token");
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
 
     if (!mounted) return;
 
- if (token != null) {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (_) => DashboardScreen(token: token, ), 
-    ),
-  );
-} else {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (_) => const LoginScreen(),
-    ),
-  );
-}
+    if (token != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => DashboardScreen(token: token),
+        ),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const LoginScreen(),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
+      backgroundColor: const Color(0xFF0B023D),
 
       body: Container(
-
         width: double.infinity,
-
         decoration: const BoxDecoration(
-
           gradient: LinearGradient(
-             colors: [Color.fromARGB(255, 4, 0, 22), Color.fromARGB(255, 14, 4, 55)],
-        
-
-             begin: Alignment.topCenter,
-             end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF0B023D), // dark navy (settings style)
+              Color.fromARGB(255, 30, 10, 80),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
 
         child: Center(
+          child: ResponsiveBody(
+            alignTop: false,
+            child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
 
-          child: Image.asset(
-            "assets/images/Online school logo.png",
-            height: 140,
+              Image.asset(
+                "assets/images/Online school logo.png",
+                height: Responsive.value(
+                  context,
+                  mobile: 120.0,
+                  tablet: 140.0,
+                  desktop: 150.0,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              const Text(
+                "Zinda Online School",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              const CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            ],
+          ),
           ),
         ),
       ),

@@ -8,6 +8,7 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_label.dart';
 import '../../widgets/custom_textfield.dart';
+import '../../widgets/responsive_body.dart';
 import 'reset_password.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -26,18 +27,13 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = Responsive.width(context);
-
-    final height = Responsive.height(context);
 
     final provider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: width * 0.08),
-
+        child: ResponsiveBody(
+          child: SingleChildScrollView(
             child: Form(
               key: formKey,
 
@@ -45,7 +41,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
-                  SizedBox(height: height * 0.06),
+                  SizedBox(height: Responsive.spacing(context, 0.06)),
 
                   /// TITLE
                   Center(
@@ -53,14 +49,14 @@ class _OtpScreenState extends State<OtpScreen> {
                       "Verify OTP",
 
                       style: TextStyle(
-                        fontSize: width * 0.07,
+                        fontSize: Responsive.fontSize(context, 0.07, min: 22, max: 30),
 
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
 
-                  SizedBox(height: height * 0.02),
+                  SizedBox(height: Responsive.spacing(context, 0.02)),
 
                   Center(
                     child: Text(
@@ -68,11 +64,13 @@ class _OtpScreenState extends State<OtpScreen> {
 
                       textAlign: TextAlign.center,
 
-                      style: TextStyle(fontSize: width * 0.04),
+                      style: TextStyle(
+                        fontSize: Responsive.fontSize(context, 0.04, min: 14, max: 18),
+                      ),
                     ),
                   ),
 
-                  SizedBox(height: height * 0.06),
+                  SizedBox(height: Responsive.spacing(context, 0.06)),
 
                   /// OTP LABEL
                   const CustomLabel(text: "OTP"),
@@ -104,7 +102,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     },
                   ),
 
-                  SizedBox(height: height * 0.05),
+                  SizedBox(height: Responsive.spacing(context, 0.05)),
 
                   /// VERIFY BUTTON
                   CustomButton(
@@ -143,7 +141,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     },
                   ),
 
-                  SizedBox(height: height * 0.03),
+                  SizedBox(height: Responsive.spacing(context, 0.03)),
                 ],
               ),
             ),

@@ -9,6 +9,7 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_label.dart';
 import '../../widgets/custom_textfield.dart';
+import '../../widgets/responsive_body.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
@@ -47,35 +48,31 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = Responsive.width(context);
-    final height = Responsive.height(context);
     final provider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: width * 0.08),
-
+        child: ResponsiveBody(
+          child: SingleChildScrollView(
             child: Form(
               key: formKey,
 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: height * 0.05),
+                  SizedBox(height: Responsive.spacing(context, 0.05)),
 
                   Center(
                     child: Text(
                       "Create New Password",
                       style: TextStyle(
-                        fontSize: width * 0.07,
+                        fontSize: Responsive.fontSize(context, 0.07, min: 22, max: 30),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
 
-                  SizedBox(height: height * 0.05),
+                  SizedBox(height: Responsive.spacing(context, 0.05)),
 
                   /// NEW PASSWORD
                   const CustomLabel(text: "NEW PASSWORD"),
@@ -102,7 +99,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     },
                   ),
 
-                  SizedBox(height: height * 0.03),
+                  SizedBox(height: Responsive.spacing(context, 0.03)),
 
                   /// CONFIRM PASSWORD
                   const CustomLabel(text: "CONFIRM PASSWORD"),
@@ -135,7 +132,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     },
                   ),
 
-                  SizedBox(height: height * 0.05),
+                  SizedBox(height: Responsive.spacing(context, 0.05)),
 
                   /// RESET BUTTON
                   CustomButton(
@@ -170,7 +167,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     },
                   ),
 
-                  SizedBox(height: height * 0.03),
+                  SizedBox(height: Responsive.spacing(context, 0.03)),
                 ],
               ),
             ),

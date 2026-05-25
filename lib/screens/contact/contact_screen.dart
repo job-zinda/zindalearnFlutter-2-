@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:zindaonlineschool/core/utils/responsive.dart';
+import 'package:zindaonlineschool/widgets/responsive_body.dart';
 
 class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
@@ -16,77 +18,66 @@ class ContactScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isTablet = size.width > 600;
-
     return Scaffold(
       body: Container(
+        width: double.infinity,
         decoration: const BoxDecoration(
           color: Color.fromARGB(255, 13, 2, 64),
         ),
-
         child: Center(
-          child: Container(
-            width: isTablet ? 450 : double.infinity,
-            margin: const EdgeInsets.all(20),
-            padding: const EdgeInsets.all(22),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.95),
-              borderRadius: BorderRadius.circular(25),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 30,
-                  color: Colors.black26,
-                  offset: const Offset(0, 10),
-                )
-              ],
-            ),
-
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // HEADER
-                const Text(
-                  "Get in Touch",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F172A),
+          child: ResponsiveBody(
+            alignTop: false,
+            child: Container(
+              width: double.infinity,
+              padding: Responsive.screenPadding(context),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.95),
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: const [
+                  BoxShadow(
+                    blurRadius: 30,
+                    color: Colors.black26,
+                    offset: Offset(0, 10),
                   ),
-                ),
-
-                const SizedBox(height: 8),
-
-                const Text(
-                  "We’re here to help you anytime",
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Get in Touch",
+                    style: TextStyle(
+                      fontSize: Responsive.fontSize(context, 0.07, min: 22, max: 28),
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF0F172A),
+                    ),
                   ),
-                ),
-
-                const SizedBox(height: 25),
-
-                // CALL BUTTON
-                _buildContactCard(
-                  icon: Icons.call,
-                  title: "Call Now",
-                  subtitle: "8921923281",
-                  color: const Color(0xFF2563EB), // blue
-                  onTap: makeCall,
-                ),
-
-                const SizedBox(height: 15),
-
-                // WHATSAPP BUTTON
-                _buildContactCard(
-                  icon: Icons.chat,
-                  title: "WhatsApp",
-                  subtitle: "Chat instantly with us",
-                  color: const Color(0xFF25D366), // whatsapp green
-                  onTap: openWhatsApp,
-                ),
-              ],
+                  SizedBox(height: Responsive.spacing(context, 0.01)),
+                  Text(
+                    "We're here to help you anytime",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: Responsive.fontSize(context, 0.035, min: 13, max: 16),
+                    ),
+                  ),
+                  SizedBox(height: Responsive.spacing(context, 0.03)),
+                  _buildContactCard(
+                    icon: Icons.call,
+                    title: "Call Now",
+                    subtitle: "8921923281",
+                    color: const Color(0xFF2563EB),
+                    onTap: makeCall,
+                  ),
+                  SizedBox(height: Responsive.spacing(context, 0.015)),
+                  _buildContactCard(
+                    icon: Icons.chat,
+                    title: "WhatsApp",
+                    subtitle: "Chat instantly with us",
+                    color: const Color(0xFF25D366),
+                    onTap: openWhatsApp,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -128,29 +119,29 @@ class ContactScreen extends StatelessWidget {
               ),
               child: Icon(icon, color: color, size: 26),
             ),
-
             const SizedBox(width: 15),
-
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F172A),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0F172A),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey,
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

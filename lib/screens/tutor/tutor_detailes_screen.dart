@@ -4,7 +4,9 @@ import 'package:zindaonlineschool/providers/chat_provider.dart';
 import 'package:zindaonlineschool/screens/chat/chat_room_screen.dart';
 import 'package:zindaonlineschool/screens/contact/contact_screen.dart';
 import 'package:zindaonlineschool/screens/review/review_screen.dart';
+import '../../core/utils/responsive.dart';
 import '../../services/home_service.dart';
+import '../../widgets/responsive_body.dart';
 
 class TutorDetailsScreen extends StatefulWidget {
   final String tutorId;
@@ -102,9 +104,8 @@ class _TutorDetailsScreenState extends State<TutorDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-
-    final height = MediaQuery.of(context).size.height;
+    final width = Responsive.contentWidth(context);
+    final height = Responsive.height(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFF0B023D),
@@ -129,8 +130,10 @@ class _TutorDetailsScreenState extends State<TutorDetailsScreen> {
                 style: TextStyle(color: Colors.white),
               ),
             )
-          : SingleChildScrollView(
-              padding: EdgeInsets.all(width * 0.05),
+          : ResponsiveBody(
+              padding: EdgeInsets.zero,
+              child: SingleChildScrollView(
+              padding: Responsive.screenPadding(context),
 
               child: Column(
                 children: [
@@ -621,6 +624,7 @@ onPressed: () async {
                   SizedBox(height: height * 0.04),
                 ],
               ),
+            ),
             ),
     );
   }

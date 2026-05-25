@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zindaonlineschool/providers/chat_provider.dart';
+import 'package:zindaonlineschool/widgets/responsive_body.dart';
 import 'chat_room_screen.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -36,7 +37,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
       body: provider.rooms.isEmpty
           ? const Center(child: Text("No Chats", style: TextStyle(color: Colors.white)))
-          : ListView.builder(
+          : ResponsiveBody(
+              padding: EdgeInsets.zero,
+              child: ListView.builder(
               itemCount: provider.rooms.length,
               itemBuilder: (context, index) {
                 final room = provider.rooms[index];
@@ -66,6 +69,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   },
                 );
               },
+            ),
             ),
     );
   }

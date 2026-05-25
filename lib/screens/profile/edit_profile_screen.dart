@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/profile_provider.dart';
+import '../../widgets/responsive_body.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final String token;
@@ -17,7 +18,9 @@ class EditProfileScreen extends StatefulWidget {
       _EditProfileScreenState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class _EditProfileScreenState
+    extends State<EditProfileScreen> {
+
   final formKey = GlobalKey<FormState>();
 
   late TextEditingController nameController;
@@ -45,8 +48,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<ProfileProvider>();
-    final width = MediaQuery.of(context).size.width;
+
+    final provider =
+        context.watch<ProfileProvider>();
 
     return Scaffold(
       backgroundColor: const Color(0xFF0B023D),
@@ -55,179 +59,255 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         backgroundColor: const Color(0xFF0B023D),
         elevation: 0,
         title: const Text("Edit Profile"),
-        centerTitle: true,
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      body: Form(
+        key: formKey,
 
-        child: Form(
-          key: formKey,
+        child: ResponsiveBody(
+          child: ListView(
+          children: [
 
-          child: Column(
-            children: [
+            const SizedBox(height: 10),
 
-              const SizedBox(height: 20),
-
-              /// PROFILE IMAGE (INSTAGRAM STYLE)
-              Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-
-                  // CircleAvatar(
-                  //   radius: 60,
-                  //   backgroundImage:
-                  //       widget.profileData["profile"] != null
-                  //           ? NetworkImage(widget.profileData["profile"])
-                  //           : null,
-                  //   child: widget.profileData["profile"] == null
-                  //       ? const Icon(Icons.person, size: 60)
-                  //       : null,
-                  // ),
-
-                  // Container(
-                  //   decoration: const BoxDecoration(
-                  //     color: Colors.purple,
-                  //     shape: BoxShape.circle,
-                  //   ),
-
-                  //   child: IconButton(
-                  //     icon: const Icon(Icons.edit,
-                  //         color: Colors.white, size: 18),
-                  //     onPressed: () {
-                  //       // TODO: upload image later
-                  //     },
-                  //   ),
-                  // ),
-                ],
-              ),
-
-              const SizedBox(height: 30),
-
-              /// NAME FIELD
-              _buildField(
-                controller: nameController,
-                label: "Name",
-                icon: Icons.person,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return "Enter name";
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 15),
-
-              /// PHONE FIELD
-              _buildField(
-                controller: phoneController,
-                label: "Phone",
-                icon: Icons.phone,
-                keyboard: TextInputType.phone,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return "Enter phone";
-                  }
-                  if (value.length < 10) {
-                    return "Enter valid phone";
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 30),
-
-              /// UPDATE BUTTON (MODERN STYLE)
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+            /// HEADER CARD
+            _buildCard(
+              child: ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: Colors.white24,
+                  child: Icon(
+                    Icons.edit,
+                    color: Colors.white,
                   ),
-onPressed: provider.isLoading
-    ? null
-    : () async {
+                ),
 
-        if (!formKey.currentState!.validate()) return;
+                title: const Text(
+                  "Update Your Info",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
 
-        final (success, message) =
-            await provider.updateProfile(
-          token: widget.token,
-          name: nameController.text.trim(),
-          phone: phoneController.text.trim(),
-        );
-
-        if (!context.mounted) return;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message.toString())),
-        );
-
-       
-        if (success) {
-          Navigator.pop(context, true);
-        }
-      },
-
-                  child: provider.isLoading
-                      ? const CircularProgressIndicator(
-                          color: Colors.white,
-                        )
-                      : const Text(
-                          "Update Profile",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                subtitle: const Text(
+                  "Change your name & phone number",
+                  style: TextStyle(
+                    color: Colors.white54,
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+
+            const SizedBox(height: 20),
+
+            _sectionTitle("Edit Details"),
+
+            _buildCard(
+              child: Column(
+                children: [
+
+                  _tileField(
+                    icon: Icons.person,
+                    label: "Name",
+                    controller: nameController,
+                  ),
+
+                  const Divider(
+                    color: Colors.white10,
+                  ),
+
+                  _tileField(
+                    icon: Icons.phone,
+                    label: "Phone",
+                    controller: phoneController,
+                    keyboard: TextInputType.phone,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    const Color.fromARGB(
+                      255,
+                      78,
+                      35,
+                      131,
+                    ),
+
+                padding:
+                    const EdgeInsets.symmetric(
+                  vertical: 14,
+                ),
+
+                shape:
+                    RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(14),
+                ),
+              ),
+
+              onPressed:
+                  provider.isLoading
+                  ? null
+                  : () async {
+
+                      if (!formKey
+                          .currentState!
+                          .validate()) {
+                        return;
+                      }
+
+                      final (
+                        success,
+                        message,
+                      ) = await provider
+                          .updateProfile(
+                        token: widget.token,
+
+                        name: nameController.text
+                            .trim(),
+
+                        phone:
+                            phoneController.text
+                                .trim(),
+                      );
+
+                      if (!context.mounted)
+                        return;
+
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            message.toString(),
+                          ),
+                        ),
+                      );
+
+                      if (success) {
+                        Navigator.pop(
+                          context,
+                          true,
+                        );
+                      }
+                    },
+
+              child: provider.isLoading
+                  ? const CircularProgressIndicator(
+                      color: Colors.white,
+                    )
+                  : const Text(
+                      "Save Changes",
+                      style: TextStyle(
+                        fontWeight:
+                            FontWeight.bold,
+                      ),
+                    ),
+            ),
+          ],
+        ),
         ),
       ),
     );
   }
 
-  /// REUSABLE INPUT FIELD
-  Widget _buildField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType keyboard = TextInputType.text,
-    String? Function(String?)? validator,
+  /// CARD
+  Widget _buildCard({
+    required Widget child,
   }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboard,
-
-      style: const TextStyle(color: Colors.white),
-
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
-
-        prefixIcon: Icon(icon, color: Colors.white70),
-
-        filled: true,
-        fillColor: Colors.white10,
-
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(
+          0.06,
         ),
 
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.white24),
-        ),
+        borderRadius:
+            BorderRadius.circular(18),
+
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(
+              0.2,
+            ),
+
+            blurRadius: 10,
+
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
 
-      validator: validator,
+      child: child,
+    );
+  }
+
+  /// SECTION TITLE
+  Widget _sectionTitle(String title) {
+    return Padding(
+      padding:
+          const EdgeInsets.only(bottom: 10),
+
+      child: Text(
+        title,
+
+        style: const TextStyle(
+          color: Colors.white70,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  /// FORM FIELD
+  Widget _tileField({
+    required IconData icon,
+    required String label,
+    required TextEditingController controller,
+    TextInputType keyboard =
+        TextInputType.text,
+  }) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: Colors.white,
+      ),
+
+      title: TextFormField(
+        controller: controller,
+
+        keyboardType: keyboard,
+
+        style: const TextStyle(
+          color: Colors.white,
+        ),
+
+        validator: (value) {
+
+          if (value == null ||
+              value.trim().isEmpty) {
+
+            return "$label is required";
+          }
+
+          return null;
+        },
+
+        decoration: InputDecoration(
+          border: InputBorder.none,
+
+          labelText: label,
+
+          labelStyle:
+              const TextStyle(
+            color: Colors.white70,
+          ),
+        ),
+      ),
     );
   }
 }

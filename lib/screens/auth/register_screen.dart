@@ -9,6 +9,7 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_label.dart';
 import '../../widgets/custom_textfield.dart';
+import '../../widgets/responsive_body.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -49,8 +50,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = Responsive.width(context);
-    final height = Responsive.height(context);
     // final provider = Provider.of<AuthProvider>(context);
     final provider = context.watch<AuthProvider>();
 
@@ -62,9 +61,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         },
 
         child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: width * 0.05),
-
+          child: ResponsiveBody(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -83,7 +80,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Text(
                       "Create Account",
                       style: TextStyle(
-                        fontSize: width * 0.08,
+                        fontSize: Responsive.fontSize(context, 0.08, min: 24, max: 32),
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -93,11 +90,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Text(
                       "Fill your details to register",
                       style: TextStyle(
-                        fontSize: width * 0.04,
+                        fontSize: Responsive.fontSize(context, 0.04, min: 14, max: 18),
                         color: Colors.white,
                       ),
                     ),
-                    SizedBox(height: height * 0.04),
+                    SizedBox(height: Responsive.spacing(context, 0.04)),
 
                     const CustomLabel(text: "FULL NAME"),
 
@@ -117,7 +114,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
 
-                    SizedBox(height: height * 0.015),
+                    SizedBox(height: Responsive.spacing(context, 0.015)),
 
                     const CustomLabel(text: "EMAIL"),
                     AppSpacing.h10,
@@ -140,7 +137,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
 
-                    SizedBox(height: height * 0.015),
+                    SizedBox(height: Responsive.spacing(context, 0.015)),
                     const CustomLabel(text: "PHONE NUMBER"),
                     AppSpacing.h10,
                     CustomTextField(
@@ -166,7 +163,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
 
-                    SizedBox(height: height * 0.015),
+                    SizedBox(height: Responsive.spacing(context, 0.015)),
                     const CustomLabel(text: "PASSWORD"),
                     AppSpacing.h10,
                     CustomTextField(
@@ -192,7 +189,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
 
-                    SizedBox(height: height * 0.015),
+                    SizedBox(height: Responsive.spacing(context, 0.015)),
                     const CustomLabel(text: "CONFIRM PASSWORD"),
                     AppSpacing.h10,
                     CustomTextField(

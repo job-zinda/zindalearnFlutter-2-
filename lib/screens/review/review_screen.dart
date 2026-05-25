@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/utils/responsive.dart';
 import '../../providers/review_provider.dart';
+import '../../widgets/responsive_body.dart';
 
 class WriteReviewScreen extends StatefulWidget {
   final String tutorId;
@@ -48,9 +50,8 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<ReviewProvider>();
 
-    final width = MediaQuery.of(context).size.width;
-
-    final height = MediaQuery.of(context).size.height;
+    final width = Responsive.contentWidth(context);
+    final height = Responsive.height(context);
 
     final isEdit = widget.reviewId != null;
 
@@ -68,8 +69,10 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
       ),
 
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(width * 0.05),
+        child: ResponsiveBody(
+          padding: EdgeInsets.zero,
+          child: SingleChildScrollView(
+          padding: Responsive.screenPadding(context),
 
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -324,6 +327,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
               SizedBox(height: height * 0.03),
             ],
           ),
+        ),
         ),
       ),
     );

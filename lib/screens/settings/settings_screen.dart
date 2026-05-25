@@ -5,6 +5,7 @@ import 'package:zindaonlineschool/providers/feedback_provider.dart';
 import 'package:zindaonlineschool/screens/auth/login_screen.dart';
 import 'package:zindaonlineschool/screens/feedback/feedback_scree.dart';
 import 'package:zindaonlineschool/screens/profile/profile_screen.dart';
+import 'package:zindaonlineschool/widgets/responsive_body.dart';
 
 class SettingsScreen extends StatefulWidget {
   final String token;
@@ -26,9 +27,8 @@ context
     .fetchMyFeedback(widget.token);    });
   }
 
+  @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-
     return Scaffold(
       backgroundColor: const Color(0xFF0B023D),
 
@@ -38,9 +38,8 @@ context
         title: const Text("Settings"),
       ),
 
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-
+      body: ResponsiveBody(
+        child: ListView(
         children: [
           /// PROFILE CARD ⭐
           _buildCard(
@@ -175,6 +174,7 @@ context
             ),
           ),
         ],
+      ),
       ),
     );
   }

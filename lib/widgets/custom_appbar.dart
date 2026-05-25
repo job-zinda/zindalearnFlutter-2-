@@ -16,31 +16,17 @@ class CustomAppBar extends StatelessWidget
   @override
   Widget build(BuildContext context) {
 
-    final width =
-        Responsive.width(context);
-
     return AppBar(
-
       elevation: 0,
-
       centerTitle: true,
-
       backgroundColor: Colors.white,
-
       foregroundColor: Colors.white,
-
       title: Text(
-
         title,
-
         style: TextStyle(
           color: AppColors.white,
-
-          fontSize:
-          width * 0.05,
-
-          fontWeight:
-          FontWeight.bold,
+          fontSize: Responsive.fontSize(context, 0.05, min: 16, max: 22),
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

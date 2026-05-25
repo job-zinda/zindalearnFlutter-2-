@@ -343,6 +343,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zindaonlineschool/providers/feedback_provider.dart';
+import 'package:zindaonlineschool/widgets/responsive_body.dart';
 
 class FeedbackScreen extends StatefulWidget {
   final String token;
@@ -377,10 +378,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     bool success;
 
     if (editId != null) {
-      await provider.deleteFeedback(
-        token: widget.token,
-        id: editId!,
-      );
+      await provider.deleteFeedback(token: widget.token, id: editId!);
       editId = null;
     }
 
@@ -446,12 +444,9 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         centerTitle: true,
       ),
 
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-
+      body: ResponsiveBody(
         child: Column(
           children: [
-
             /// INPUT CARD
             Container(
               padding: const EdgeInsets.all(16),
@@ -468,14 +463,15 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
               child: Column(
                 children: [
-
                   TextField(
                     controller: controller,
                     maxLines: 3,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Write your feedback...",
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                      hintStyle: TextStyle(
+                        color: Colors.white.withOpacity(0.5),
+                      ),
                       border: InputBorder.none,
                     ),
                   ),
@@ -527,122 +523,124 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : feedbackList.isEmpty
-                      ? const Center(
-                          child: Text(
-                            "No feedback yet",
-                            style: TextStyle(color: Colors.white54),
+                  ? const Center(
+                      child: Text(
+                        "No feedback yet",
+                        style: TextStyle(color: Colors.white54),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: feedbackList.length,
+                      itemBuilder: (context, index) {
+                        final item = feedbackList[index];
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                            color: Colors.white.withOpacity(0.06),
+                            border: Border.all(color: Colors.white10),
                           ),
-                        )
-                      : ListView.builder(
-                          itemCount: feedbackList.length,
-                          itemBuilder: (context, index) {
-                            final item = feedbackList[index];
 
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(18),
-                                color: Colors.white.withOpacity(0.06),
-                                border: Border.all(color: Colors.white10),
-                              ),
-
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
                                 children: [
-
-                                  Row(
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundColor: Colors.deepPurple,
-                                        child: Text(
-                                          (item["studentId"]?["name"] ?? "S")
-                                              .toString()
-                                              .substring(0, 1)
-                                              .toUpperCase(),
-                                          style: const TextStyle(color: Colors.white),
-                                        ),
+                                  CircleAvatar(
+                                    backgroundColor: Colors.deepPurple,
+                                    child: Text(
+                                      (item["studentId"]?["name"] ?? "S")
+                                          .toString()
+                                          .substring(0, 1)
+                                          .toUpperCase(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
                                       ),
-
-                                      const SizedBox(width: 10),
-
-                                      Expanded(
-                                        child: Text(
-                                          item["studentId"]?["name"] ?? "Student",
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  const SizedBox(height: 10),
-
-                                  Text(
-                                    item["message"] ?? "",
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      height: 1.4,
                                     ),
                                   ),
 
-                                  const SizedBox(height: 10),
+                                  const SizedBox(width: 10),
 
-                                  Row(
-                                    children: List.generate(5, (i) {
-                                      return Icon(
-                                        i < (item["rating"] ?? 0)
-                                            ? Icons.star
-                                            : Icons.star_border,
-                                        color: Colors.amber,
-                                        size: 18,
-                                      );
-                                    }),
-                                  ),
-
-                                  const SizedBox(height: 10),
-
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-
-                                      IconButton(
-                                        icon: const Icon(Icons.edit,
-                                            color: Colors.white),
-                                        onPressed: () {
-                                          setState(() {
-                                            controller.text =
-                                                item["message"] ?? "";
-                                            rating = item["rating"] ?? 0;
-                                            editId = item["_id"];
-                                          });
-                                        },
+                                  Expanded(
+                                    child: Text(
+                                      item["studentId"]?["name"] ?? "Student",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
                                       ),
-
-                                      IconButton(
-                                        icon: const Icon(Icons.delete,
-                                            color: Colors.redAccent),
-                                        onPressed: () async {
-                                          await context
-                                              .read<FeedbackProvider>()
-                                              .deleteFeedback(
-                                                token: widget.token,
-                                                id: item["_id"],
-                                              );
-
-                                          showSnackBar(
-                                              "Deleted", Colors.red);
-                                        },
-                                      ),
-                                    ],
+                                    ),
                                   ),
                                 ],
                               ),
-                            );
-                          },
-                        ),
+
+                              const SizedBox(height: 10),
+
+                              Text(
+                                item["message"] ?? "",
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  height: 1.4,
+                                ),
+                              ),
+
+                              const SizedBox(height: 10),
+
+                              Row(
+                                children: List.generate(5, (i) {
+                                  return Icon(
+                                    i < (item["rating"] ?? 0)
+                                        ? Icons.star
+                                        : Icons.star_border,
+                                    color: Colors.amber,
+                                    size: 18,
+                                  );
+                                }),
+                              ),
+
+                              const SizedBox(height: 10),
+
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Colors.white,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        controller.text = item["message"] ?? "";
+                                        rating = item["rating"] ?? 0;
+                                        editId = item["_id"];
+                                      });
+                                    },
+                                  ),
+
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.redAccent,
+                                    ),
+                                    onPressed: () async {
+                                      await context
+                                          .read<FeedbackProvider>()
+                                          .deleteFeedback(
+                                            token: widget.token,
+                                            id: item["_id"],
+                                          );
+
+                                      showSnackBar("Deleted", Colors.red);
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),

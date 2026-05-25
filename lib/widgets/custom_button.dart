@@ -1,6 +1,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../core/utils/responsive.dart';
+
 class CustomButton extends StatelessWidget {
 
   final String text;
@@ -20,7 +22,7 @@ class CustomButton extends StatelessWidget {
     return SizedBox(
 
       width: double.infinity,
-      height: 56,
+      height: Responsive.value(context, mobile: 52.0, tablet: 56.0, desktop: 56.0),
 
       child: ElevatedButton(
 
@@ -42,8 +44,8 @@ class CustomButton extends StatelessWidget {
             : Text(
                 text,
 
-                style: const TextStyle(
-                  fontSize: 16,
+                style: TextStyle(
+                  fontSize: Responsive.fontSize(context, 0.04, min: 14, max: 18),
                   fontWeight: FontWeight.bold,
                 ),
               ),

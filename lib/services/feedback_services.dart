@@ -27,60 +27,140 @@ class FeedbackService {
   /// =========================
   /// GET ALL USERS FEEDBACK
   /// =========================
-  static Future<Map<String, dynamic>>
-      getAllUsersFeedback(String token) async {
+  // static Future<Map<String, dynamic>>
+  //     getAllUsersFeedback(String token) async {
 
-    final res = await http.get(
-      Uri.parse("$baseUrl/get/feedback/all"),
-      headers: {
-        "Authorization": "Bearer $token",
-      },
-    );
+  //   final res = await http.get(
+  //     Uri.parse("$baseUrl/get/feedback/all"),
+  //     headers: {
+  //       "Authorization": "Bearer $token",
+  //     },
+  //   );
+
+  //   return _safeDecode(res);
+  // }
+static Future<Map<String,dynamic>>
+getAllUsersFeedback(String token) async {
+
+  try {
+
+    final res = await http
+        .get(
+          Uri.parse("$baseUrl/get/feedback/all"),
+          headers: {
+            "Authorization":"Bearer $token",
+          },
+        )
+        .timeout(const Duration(seconds:60));
 
     return _safeDecode(res);
-  }
 
+  } catch(e) {
+
+    print("ALL FEEDBACK ERROR: $e");
+
+    throw Exception(
+      "Connection problem / Render server sleeping",
+    );
+  }
+}
   /// =========================
   /// GET MY FEEDBACK
   /// =========================
-  static Future<Map<String, dynamic>>
-      getMyFeedback(String token) async {
+  // static Future<Map<String, dynamic>>
+  //     getMyFeedback(String token) async {
 
-    final res = await http.get(
-      Uri.parse("$baseUrl/feedback/my"),
-      headers: {
-        "Authorization": "Bearer $token",
-      },
-    );
+  //   final res = await http.get(
+  //     Uri.parse("$baseUrl/feedback/my"),
+  //     headers: {
+  //       "Authorization": "Bearer $token",
+  //     },
+  //   );
+
+  //   return _safeDecode(res);
+  // }
+
+  static Future<Map<String,dynamic>>
+getMyFeedback(String token) async {
+
+  try {
+
+    final res = await http
+        .get(
+          Uri.parse("$baseUrl/feedback/my"),
+          headers: {
+            "Authorization":"Bearer $token",
+          },
+        )
+        .timeout(const Duration(seconds:60));
 
     return _safeDecode(res);
+
+  } catch(e) {
+
+    print("MY FEEDBACK ERROR: $e");
+
+    throw Exception("Network Error");
   }
+}
 
   /// =========================
   /// SEND FEEDBACK
   /// =========================
-  static Future sendFeedback({
-    required String token,
-    required String message,
-    required int rating,
-  }) async {
+  // static Future sendFeedback({
+  //   required String token,
+  //   required String message,
+  //   required int rating,
+  // }) async {
 
-    final res = await http.post(
-      Uri.parse("$baseUrl/feedback"),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
+  //   final res = await http.post(
+  //     Uri.parse("$baseUrl/feedback"),
+  //     headers: {
+  //       "Authorization": "Bearer $token",
+  //       "Content-Type": "application/json",
+  //     },
 
-      body: jsonEncode({
-        "message": message,
-        "rating": rating,
-      }),
-    );
+  //     body: jsonEncode({
+  //       "message": message,
+  //       "rating": rating,
+  //     }),
+  //   );
+
+  //   return _safeDecode(res);
+  // }
+static Future sendFeedback({
+required String token,
+required String message,
+required int rating,
+}) async {
+
+  try {
+
+    final res = await http
+        .post(
+          Uri.parse("$baseUrl/feedback"),
+
+          headers:{
+            "Authorization":"Bearer $token",
+            "Content-Type":"application/json",
+          },
+
+          body:jsonEncode({
+            "message":message,
+            "rating":rating,
+          }),
+        )
+        .timeout(const Duration(seconds:60));
 
     return _safeDecode(res);
-  }
 
+  } catch(e) {
+
+    print("SEND FEEDBACK ERROR: $e");
+
+    throw Exception("Send Feedback Failed");
+  }
+}
   /// =========================
   /// UPDATE FEEDBACK
   /// =========================
@@ -106,7 +186,7 @@ static Future<bool> updateFeedback({
     },
 
     body: jsonEncode({
-      "id": id,          // ✅ IMPORTANT: send id in BODY
+      "id": id,          //  IMPORTANT: send id in BODY
       "message": message,
       "rating": rating,
     }),
