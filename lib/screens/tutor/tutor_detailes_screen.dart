@@ -29,31 +29,28 @@ class _TutorDetailsScreenState extends State<TutorDetailsScreen> {
   Map<String, dynamic>? tutor;
 
   bool isLoading = true;
+  bool isSendingRequest = false;
 
   // @override
   // void initState() {
   //   super.initState();
   //   fetchTutorDetails();
   // }
-@override
-void initState() {
-  super.initState();
+  @override
+  void initState() {
+    super.initState();
 
-  Future.microtask(() async {
+    Future.microtask(() async {
+      await context.read<AuthProvider>().loadUser();
 
-    await context
-        .read<AuthProvider>()
-        .loadUser();
+      print(
+        "AUTH USER ID = "
+        "${context.read<AuthProvider>().userId}",
+      );
 
-    print(
-      "AUTH USER ID = "
-      "${context.read<AuthProvider>().userId}",
-    );
-
-    fetchTutorDetails();
-
-  });
-}
+      fetchTutorDetails();
+    });
+  }
 
   Future<void> fetchTutorDetails() async {
     try {
@@ -114,16 +111,14 @@ void initState() {
     double total = 0;
     int count = 0;
 
-    for (var r in reviews) {
-      if (r["rating"] != null) {
-        total += (r["rating"]).toDouble();
+    for (var review in reviews) {
+      if (review["rating"] != null) {
+        total += review["rating"].toDouble();
         count++;
       }
     }
 
-    if (count == 0) return 0;
-
-    return total / count;
+    return count == 0 ? 0 : total / count;
   }
 
   @override
@@ -511,127 +506,145 @@ void initState() {
                                       : Colors.green,
                                 ),
 
+                             
                                 // onPressed: () async {
-                                //   final res = await context
-                                //       .read<ChatProvider>()
-                                //       .connectTutor(widget.tutorId, widget.token);
+                                //   final chatProvider = context
+                                //       .read<ChatProvider>();
+
+                                //   final res = await chatProvider.connectTutor(
+                                //     widget.tutorId,
+                                //     widget.token,
+                                //   );
 
                                 //   if (!mounted) return;
 
-                                //   if (res == null || res is! Map<String, dynamic>) {
+                                //   if (res == null ||
+                                //       res is! Map<String, dynamic>) {
                                 //     ScaffoldMessenger.of(context).showSnackBar(
-                                //       const SnackBar(content: Text("Request Failed (no response)")),
+                                //       const SnackBar(
+                                //         content: Text("Request Failed"),
+                                //       ),
                                 //     );
                                 //     return;
                                 //   }
 
-                                //   final roomData = res["room"];
+                                //   final room = res["room"];
 
-                                //   if (roomData == null || roomData is! Map<String, dynamic>) {
+                                //   if (room == null || room["_id"] == null) {
                                 //     ScaffoldMessenger.of(context).showSnackBar(
-                                //       const SnackBar(content: Text("Request Failed (no room)")),
+                                //       const SnackBar(
+                                //         content: Text("Room not created"),
+                                //       ),
                                 //     );
                                 //     return;
                                 //   }
 
-                                //   final roomId = roomData["_id"];
+                                //   final roomId = room["_id"];
 
-                                //   if (roomId == null) {
-                                //     ScaffoldMessenger.of(context).showSnackBar(
-                                //       const SnackBar(content: Text("Room ID missing")),
-                                //     );
-                                //     return;
-                                //   }
+                                //   if (!mounted) return;
 
                                 //   ScaffoldMessenger.of(context).showSnackBar(
-                                //     const SnackBar(content: Text("Request Sent")),
+                                //     const SnackBar(
+                                //       content: Text(
+                                //         "Request Sent Successfully",
+                                //       ),
+                                //     ),
                                 //   );
 
-                                // Navigator.push(
-                                //   context,
-                                //   MaterialPageRoute(
-                                //     builder: (_) => ChatRoomScreen(
-                                //       roomId: roomId,
-                                //       token: widget.token,
-
-                                //       tutor: {
-                                //         "_id": tutor!["_id"],
-                                //         "name": tutor!["name"],
-                                //         "photo": tutor!["photo"],
-                                //         "qualification": tutor!["qualification"],
-                                //       },
+                                //   Navigator.pushReplacement(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //       builder: (_) => ChatRoomScreen(
+                                //         roomId: roomId,
+                                //         token: widget.token,
+                                //         tutor: {
+                                //           "_id": widget.tutorId,
+                                //           "name": tutor?["name"] ?? "",
+                                //           "photo": tutor?["photo"] ?? "",
+                                //           "qualification":
+                                //               tutor?["qualification"] ?? "",
+                                //         },
+                                //       ),
                                 //     ),
-                                //   ),
-                                // );
+                                //   );
+                                //   chatProvider.fetchRooms(widget.token);
                                 // },
-                                onPressed: () async {
-                                  final chatProvider = context
-                                      .read<ChatProvider>();
+                                onPressed: isSendingRequest
+    ? null
+    : () async {
 
-                                  final res = await chatProvider.connectTutor(
-                                    widget.tutorId,
-                                    widget.token,
-                                  );
+        setState(() {
+          isSendingRequest = true;
+        });
 
-                                  if (!mounted) return;
+        try {
 
-                                  if (res == null ||
-                                      res is! Map<String, dynamic>) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text("Request Failed"),
-                                      ),
-                                    );
-                                    return;
-                                  }
+          final chatProvider = context.read<ChatProvider>();
 
-                                  final room = res["room"];
+          final res = await chatProvider.connectTutor(
+            widget.tutorId,
+            widget.token,
+          );
 
-                                  if (room == null || room["_id"] == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text("Room not created"),
-                                      ),
-                                    );
-                                    return;
-                                  }
+          if (!mounted) return;
 
-                                  final roomId = room["_id"];
+          if (res == null || res is! Map<String,dynamic>) {
+            throw Exception("Request failed");
+          }
 
-                                  /// ✅ IMPORTANT: refresh rooms before navigation (fix UI state)
-                                  await chatProvider.fetchRooms(widget.token);
+          final room = res["room"];
 
-                                  if (!mounted) return;
+          final roomId = room["_id"];
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        "Request Sent Successfully",
-                                      ),
-                                    ),
-                                  );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ChatRoomScreen(
+                roomId: roomId,
+                token: widget.token,
+                tutor: {
+                  "_id": widget.tutorId,
+                  "name": tutor?["name"] ?? "",
+                  "photo": tutor?["photo"] ?? "",
+                  "qualification": tutor?["qualification"] ?? "",
+                },
+              ),
+            ),
+          );
 
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => ChatRoomScreen(
-                                        roomId: roomId,
-                                        token: widget.token,
-                                        tutor: {
-                                          "_id": widget.tutorId,
-                                          "name": tutor?["name"] ?? "",
-                                          "photo": tutor?["photo"] ?? "",
-                                          "qualification":
-                                              tutor?["qualification"] ?? "",
-                                        },
-                                      ),
-                                    ),
-                                  );
-                                },
+          chatProvider.fetchRooms(widget.token);
 
-                                child: Text(
-                                  isRequested ? "Request Sent" : "Send Request",
-                                ),
+        } catch (e) {
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString())),
+          );
+
+        } finally {
+
+          if (mounted) {
+            setState(() {
+              isSendingRequest = false;
+            });
+          }
+
+        }
+      },
+
+                               child: isSendingRequest
+    ? const SizedBox(
+        height: 18,
+        width: 18,
+        child: CircularProgressIndicator(
+          color: Colors.white,
+          strokeWidth: 2,
+        ),
+      )
+    : Text(
+        isRequested
+            ? "Request Sent"
+            : "Send Request",
+      ),
                               );
                             },
                           ),
@@ -838,15 +851,8 @@ void initState() {
     final myId = Provider.of<AuthProvider>(context, listen: true).userId;
 
     final isOwner =
-        myId != null && myId!.isNotEmpty && myId.trim() == reviewOwnerId.trim();
+        myId != null && myId.isNotEmpty && myId.trim() == reviewOwnerId.trim();
 
-    print("MY ID = $myId");
-    print("OWNER ID = $reviewOwnerId");
-    print("IS OWNER = $isOwner");
-    print(
-"AUTH PROVIDER ID = "
-"${context.read<AuthProvider>().userId}"
-);
     return Container(
       padding: EdgeInsets.all(width * 0.04),
 

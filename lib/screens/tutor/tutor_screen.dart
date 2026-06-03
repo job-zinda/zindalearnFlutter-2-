@@ -44,17 +44,21 @@ class _TutorsScreenState extends State<TutorsScreen> {
   // });
   //   }
 
-  double getAverageRating(List reviews) {
-    if (reviews.isEmpty) return 0;
+double getAverageRating(List reviews) {
+  if (reviews.isEmpty) return 0;
 
-    double total = 0;
+  double total = 0;
+  int count = 0;
 
-    for (var review in reviews) {
-      total += (review["rating"] ?? 0).toDouble();
+  for (var review in reviews) {
+    if (review["rating"] != null) {
+      total += review["rating"].toDouble();
+      count++;
     }
-
-    return total / reviews.length;
   }
+
+  return count == 0 ? 0 : total / count;
+}
 
   @override
   Widget build(BuildContext context) {

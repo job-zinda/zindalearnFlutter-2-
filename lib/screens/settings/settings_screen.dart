@@ -5,6 +5,10 @@ import 'package:zindaonlineschool/providers/feedback_provider.dart';
 import 'package:zindaonlineschool/screens/auth/login_screen.dart';
 import 'package:zindaonlineschool/screens/feedback/feedback_scree.dart';
 import 'package:zindaonlineschool/screens/profile/profile_screen.dart';
+import 'package:zindaonlineschool/screens/settings/about_screen.dart';
+import 'package:zindaonlineschool/screens/settings/help_support_scree.dart';
+import 'package:zindaonlineschool/screens/settings/privacy_policy.dart';
+import 'package:zindaonlineschool/screens/settings/terms_conditions_screen.dart';
 import 'package:zindaonlineschool/widgets/responsive_body.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -80,10 +84,19 @@ context
           _buildCard(
             child: Column(
               children: [
-                _tile(Icons.help, "Help & Support"),
+                _tile(Icons.help, "Help & Support",
+                    onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const HelpSupportScreen(),
+                    ),
+                  );
+                }),
                 const Divider(color: Colors.white10),
+                
 
-                /// ✅ FEEDBACK SECTION (ADD HERE)
+                ///  FEEDBACK SECTION (ADD HERE)
               Consumer<FeedbackProvider>(
   builder: (context, provider, child) {
     return ListTile(
@@ -135,10 +148,38 @@ context
           _buildCard(
             child: Column(
               children: [
-                _tile(Icons.description, "Terms & Conditions"),
-                const Divider(color: Colors.white10),
+               _tile(
+  Icons.description,
+  "Terms & Conditions",
 
-                _tile(Icons.privacy_tip, "Privacy Policy"),
+  onTap: () {
+
+    Navigator.push(
+
+      context,
+
+      MaterialPageRoute(
+        builder: (_) =>
+            const TermsConditionsScreen(),
+      ),
+    );
+  },
+),
+                const Divider(color: Colors.white10),
+_tile(
+  Icons.privacy_tip,
+  "Privacy Policy",
+
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            const PrivacyPolicyScreen(),
+      ),
+    );
+  },
+),
               ],
             ),
           ),
@@ -146,7 +187,22 @@ context
           const SizedBox(height: 20),
 
           /// ABOUT
-          _buildCard(child: _tile(Icons.info, "About Zinda Learn")),
+          _buildCard(child:
+_tile(
+  Icons.info,
+  "About Zinda Online School",
+
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const AboutScreen(),
+      ),
+    );
+  },
+),
+
+           ),
 
           const SizedBox(height: 30),
 
@@ -202,18 +258,33 @@ context
   }
 
   /// LIST TILE DESIGN
-  Widget _tile(IconData icon, String title) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.white),
-      title: Text(title, style: const TextStyle(color: Colors.white)),
-      trailing: const Icon(
-        Icons.arrow_forward_ios,
-        color: Colors.white54,
-        size: 16,
+  Widget _tile(
+  IconData icon,
+  String title,{
+  VoidCallback? onTap,
+}) {
+
+  return ListTile(
+
+    leading:
+        Icon(icon,color: Colors.white),
+
+    title: Text(
+      title,
+      style: const TextStyle(
+        color: Colors.white,
       ),
-      onTap: () {},
-    );
-  }
+    ),
+
+    trailing: const Icon(
+      Icons.arrow_forward_ios,
+      color: Colors.white54,
+      size: 16,
+    ),
+
+    onTap: onTap,
+  );
+}
 
   /// SECTION TITLE
   Widget _sectionTitle(String title) {

@@ -25,9 +25,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    
 
-    Future.microtask(() {
-      Future.wait([
+    Future.microtask(() async{
+    await    Future.wait([
         context.read<HomeProvider>().fetchHomeData(widget.token),
         context.read<FeedbackProvider>().fetchAllUsersFeedback(widget.token),
       ]);
@@ -58,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
             provider.refreshHomeData(widget.token),
             context.read<FeedbackProvider>().fetchAllUsersFeedback(
               widget.token,
-              force: true,
+               force: true,
             ),
           ]);
         },
@@ -202,8 +203,10 @@ class _HomeScreenState extends State<HomeScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: Colors.orange.withOpacity(0.15),
         borderRadius: BorderRadius.circular(12),
+        // ignore: deprecated_member_use
         border: Border.all(color: Colors.orange.withOpacity(0.4)),
       ),
       child: Text(
@@ -213,25 +216,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// SEARCH BAR
-  Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-      ),
-
-      child: const TextField(
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: "Search Courses",
-          prefixIcon: Icon(Icons.search),
-        ),
-      ),
-    );
-  }
 
   /// WELCOME SECTION
   Widget _buildWelcomeSection(BuildContext context) {
@@ -308,6 +292,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             boxShadow: [
               BoxShadow(
+                // ignore: deprecated_member_use
                 color: Colors.black.withOpacity(0.12),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
@@ -345,6 +330,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     boxShadow: [
       BoxShadow(
+        // ignore: deprecated_member_use
         color: Colors.black.withOpacity(0.25),
         blurRadius: 15,
         offset: const Offset(0, 8),
@@ -577,95 +563,83 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// FEEDBACK SECTION
-  Widget _buildFeedbackSection(double width, double height) {
-    return Consumer<FeedbackProvider>(
-      builder: (context, provider, child) {
-        if (provider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
+ 
+Widget buildFeedbackSection(
+    double width,
+    double height) {
 
-        if (provider.allFeedback.isEmpty) {
-          return const Text(
-            "No Feedbacks Found",
-            style: TextStyle(color: Colors.white),
-          );
-        }
+  return Consumer<FeedbackProvider>(
 
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
+    builder: (context, provider, child) {
 
-          itemCount: provider.allFeedback.length,
+      /// Loading state
+      if (provider.isLoading &&
+          provider.allFeedback.isEmpty) {
 
-          itemBuilder: (context, index) {
-            final item = provider.allFeedback[index];
-
-            return Container(
-              margin: EdgeInsets.only(bottom: height * 0.02),
-
-              padding: EdgeInsets.all(width * 0.045),
-
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-              ),
-
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: const Color(0xFF312E81),
-                        child: Text(
-                          item["name"] != null
-                              ? item["name"][0].toUpperCase()
-                              : "S",
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-
-                      SizedBox(width: width * 0.03),
-
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item["name"] ?? "Student",
-                              style: TextStyle(
-                                fontSize: width * 0.042,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-
-                            Text(
-                              item["course"] ?? "",
-                              style: TextStyle(color: Colors.grey.shade700),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: height * 0.02),
-
-                  Text(
-                    item["message"] ?? "",
-                    style: TextStyle(
-                      fontSize: width * 0.037,
-                      color: Colors.black87,
-                      height: 1.6,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+        return const Center(
+          child: CircularProgressIndicator(),
         );
-      },
-    );
-  }
+
+      }
+
+      /// Empty state
+      if (!provider.isLoading &&
+          provider.allFeedback.isEmpty) {
+
+        return const Center(
+          child: Text(
+            "No Feedback Found",
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        );
+
+      }
+
+      /// Success state
+      return ListView.builder(
+
+        shrinkWrap: true,
+
+        physics:
+            const NeverScrollableScrollPhysics(),
+
+        itemCount:
+            provider.allFeedback.length,
+
+        itemBuilder: (context,index){
+
+          final item =
+              provider.allFeedback[index];
+
+          return Container(
+            margin:
+                EdgeInsets.only(
+                    bottom:
+                        height*0.02),
+
+            padding:
+                EdgeInsets.all(
+                    width*0.045),
+
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius:
+                  BorderRadius.circular(
+                      24),
+            ),
+
+            child: Text(
+              item["message"] ?? "",
+            ),
+          );
+
+        },
+      );
+
+    },
+  );
 }
+}
+
