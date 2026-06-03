@@ -34,8 +34,8 @@ class CachedAppImage extends StatelessWidget {
       height: height,
       fit: fit,
       memCacheWidth: memWidth,
-      placeholder: (_, __) => _placeholder(),
-      errorWidget: (_, __, ___) => _placeholder(
+      placeholder: (_, _) => _placeholder(),
+      errorWidget: (_, _, _) => _placeholder(
         child: const Icon(Icons.broken_image, color: Colors.white54),
       ),
     );

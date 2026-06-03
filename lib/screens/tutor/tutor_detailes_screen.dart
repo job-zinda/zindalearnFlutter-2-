@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:zindaonlineschool/providers/auth_provider.dart';
 import 'package:zindaonlineschool/providers/chat_provider.dart';
 import 'package:zindaonlineschool/screens/chat/chat_room_screen.dart';
 import 'package:zindaonlineschool/screens/contact/contact_screen.dart';
@@ -11,7 +12,6 @@ import '../../widgets/responsive_body.dart';
 class TutorDetailsScreen extends StatefulWidget {
   final String tutorId;
   final String token;
-  
 
   const TutorDetailsScreen({
     super.key,
@@ -30,20 +30,44 @@ class _TutorDetailsScreenState extends State<TutorDetailsScreen> {
 
   bool isLoading = true;
 
-  @override
-  void initState() {
-    super.initState();
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   fetchTutorDetails();
+  // }
+@override
+void initState() {
+  super.initState();
+
+  Future.microtask(() async {
+
+    await context
+        .read<AuthProvider>()
+        .loadUser();
+
+    print(
+      "AUTH USER ID = "
+      "${context.read<AuthProvider>().userId}",
+    );
+
     fetchTutorDetails();
-  }
+
+  });
+}
 
   Future<void> fetchTutorDetails() async {
     try {
       final data = await _service.getTutorDetails(widget.tutorId, widget.token);
 
+      print(
+        "CURRENT AUTH USER ID = "
+        "${context.read<AuthProvider>().userId}",
+      );
+
       setState(() {
         tutor = data;
+        print("LOGIN USER ID = ${data["loginUserId"]}");
 
-        
         print("TUTOR DATA: $data");
         print("RATING FROM API: ${data["rating"]}");
       });
@@ -133,498 +157,515 @@ class _TutorDetailsScreenState extends State<TutorDetailsScreen> {
           : ResponsiveBody(
               padding: EdgeInsets.zero,
               child: SingleChildScrollView(
-              padding: Responsive.screenPadding(context),
+                padding: Responsive.screenPadding(context),
 
-              child: Column(
-                children: [
-                  /// TOP CARD
-                  /// TOP PROFILE CARD
-                  Container(
-                    width: double.infinity,
+                child: Column(
+                  children: [
+                    /// TOP CARD
+                    /// TOP PROFILE CARD
+                    Container(
+                      width: double.infinity,
 
-                    padding: EdgeInsets.all(width * 0.05),
+                      padding: EdgeInsets.all(width * 0.05),
 
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
 
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
 
-                        colors: [Color(0xFF1E1B4B), Color(0xFF312E81)],
+                          colors: [Color(0xFF1E1B4B), Color(0xFF312E81)],
+                        ),
+
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.25),
+
+                            blurRadius: 15,
+
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
 
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.25),
+                      child: Column(
+                        children: [
+                          /// IMAGE
+                          Container(
+                            padding: const EdgeInsets.all(4),
 
-                          blurRadius: 15,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
 
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-
-                    child: Column(
-                      children: [
-                        /// IMAGE
-                        Container(
-                          padding: const EdgeInsets.all(4),
-
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-
-                            border: Border.all(color: Colors.white24, width: 2),
-                          ),
-
-                          child: CircleAvatar(
-                            radius: width * 0.16,
-
-                            backgroundColor: Colors.white,
-
-                            backgroundImage:
-                                tutor!["photo"] != null &&
-                                    tutor!["photo"].toString().isNotEmpty
-                                ? NetworkImage(tutor!["photo"])
-                                : null,
-
-                            child:
-                                tutor!["photo"] == null ||
-                                    tutor!["photo"].toString().isEmpty
-                                ? Icon(
-                                    Icons.person,
-                                    size: width * 0.12,
-                                    color: Colors.grey,
-                                  )
-                                : null,
-                          ),
-                        ),
-
-                        SizedBox(height: height * 0.02),
-
-                        /// NAME
-                        Text(
-                          capitalizeWords(tutor!["name"] ?? ""),
-
-                          textAlign: TextAlign.center,
-
-                          style: TextStyle(
-                            color: Colors.white,
-
-                            fontSize: width * 0.07,
-
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-
-                        SizedBox(height: height * 0.01),
-
-                        /// QUALIFICATION TEXT
-                        Text(
-                          tutor!["qualification"] ?? "No Qualification",
-
-                          textAlign: TextAlign.center,
-
-                          style: TextStyle(
-                            color: Colors.white70,
-
-                            fontSize: width * 0.038,
-
-                            height: 1.5,
-                          ),
-                        ),
-
-                        SizedBox(height: height * 0.012),
-
-                        /// RATING
-                        // if (tutor!["rating"] != null)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.star_rounded,
-                              color: Colors.amber,
-                              size: width * 0.05,
-                            ),
-                            SizedBox(width: width * 0.015),
-
-                            Text(
-                              _getAverageRating(
-                                tutor!["reviews"] ?? [],
-                              ).toStringAsFixed(1),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: width * 0.04,
+                              border: Border.all(
+                                color: Colors.white24,
+                                width: 2,
                               ),
                             ),
-                          ],
-                        ),
-                        SizedBox(height: height * 0.03),
 
-                        /// PROFILE DETAILS SESSION
-                        Container(
-                          width: double.infinity,
+                            child: CircleAvatar(
+                              radius: width * 0.16,
 
-                          padding: EdgeInsets.all(width * 0.045),
+                              backgroundColor: Colors.white,
 
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.07),
+                              backgroundImage:
+                                  tutor!["photo"] != null &&
+                                      tutor!["photo"].toString().isNotEmpty
+                                  ? NetworkImage(tutor!["photo"])
+                                  : null,
 
-                            borderRadius: BorderRadius.circular(24),
+                              child:
+                                  tutor!["photo"] == null ||
+                                      tutor!["photo"].toString().isEmpty
+                                  ? Icon(
+                                      Icons.person,
+                                      size: width * 0.12,
+                                      color: Colors.grey,
+                                    )
+                                  : null,
+                            ),
                           ),
 
-                          child: Column(
+                          SizedBox(height: height * 0.02),
+
+                          /// NAME
+                          Text(
+                            capitalizeWords(tutor!["name"] ?? ""),
+
+                            textAlign: TextAlign.center,
+
+                            style: TextStyle(
+                              color: Colors.white,
+
+                              fontSize: width * 0.07,
+
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+
+                          SizedBox(height: height * 0.01),
+
+                          /// QUALIFICATION TEXT
+                          Text(
+                            tutor!["qualification"] ?? "No Qualification",
+
+                            textAlign: TextAlign.center,
+
+                            style: TextStyle(
+                              color: Colors.white70,
+
+                              fontSize: width * 0.038,
+
+                              height: 1.5,
+                            ),
+                          ),
+
+                          SizedBox(height: height * 0.012),
+
+                          /// RATING
+                          // if (tutor!["rating"] != null)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              /// QUALIFICATION
-                              buildProfileItem(
-                                width,
-
-                                icon: Icons.school_rounded,
-
-                                title: "Qualification",
-
-                                value:
-                                    tutor!["qualification"] ?? "Not Available",
+                              Icon(
+                                Icons.star_rounded,
+                                color: Colors.amber,
+                                size: width * 0.05,
                               ),
+                              SizedBox(width: width * 0.015),
 
-                              SizedBox(height: height * 0.025),
-
-                              /// COURSE
-                              buildProfileItem(
-                                width,
-
-                                icon: Icons.menu_book_rounded,
-
-                                title: "Course",
-
-                                value:
-                                    tutor!["courseId"]?["name"] ??
-                                    "Not Available",
-                              ),
-
-                              SizedBox(height: height * 0.025),
-
-                              /// SUBJECTS
-                              buildProfileItem(
-                                width,
-
-                                icon: Icons.auto_stories_rounded,
-
-                                title: "Subjects",
-
-                                value: (tutor!["subjects"] ?? []).join(", "),
-                              ),
-
-                              SizedBox(height: height * 0.025),
-
-                              /// ABOUT
-                              buildProfileItem(
-                                width,
-
-                                icon: Icons.info_outline_rounded,
-
-                                title: "About",
-
-                                value:
-                                    tutor!["about"] != null &&
-                                        tutor!["about"].toString().isNotEmpty
-                                    ? tutor!["about"]
-                                    : "No About Information",
+                              Text(
+                                _getAverageRating(
+                                  tutor!["reviews"] ?? [],
+                                ).toStringAsFixed(1),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: width * 0.04,
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: height * 0.035),
+                          SizedBox(height: height * 0.03),
 
-                  /// REVIEWS
-                  /// REVIEWS
-                  Container(
-                    width: double.infinity,
+                          /// PROFILE DETAILS SESSION
+                          Container(
+                            width: double.infinity,
 
-                    padding: EdgeInsets.all(width * 0.05),
+                            padding: EdgeInsets.all(width * 0.045),
 
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.06),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.07),
 
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-
-                      children: [
-                        /// TITLE
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.reviews_rounded,
-
-                              color: Colors.amber,
-
-                              size: width * 0.055,
+                              borderRadius: BorderRadius.circular(24),
                             ),
 
-                            SizedBox(width: width * 0.025),
+                            child: Column(
+                              children: [
+                                /// QUALIFICATION
+                                buildProfileItem(
+                                  width,
 
-                            Text(
-                              "Recent Reviews",
+                                  icon: Icons.school_rounded,
 
-                              style: TextStyle(
-                                color: Colors.white,
+                                  title: "Qualification",
 
-                                fontWeight: FontWeight.bold,
-
-                                fontSize: width * 0.045,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        SizedBox(height: height * 0.025),
-
-                        /// BACKEND REVIEWS
-                        if (tutor!["reviews"] != null &&
-                            tutor!["reviews"].isNotEmpty)
-                          ...List.generate(tutor!["reviews"].length, (index) {
-                            final review = tutor!["reviews"][index];
-
-                            return Padding(
-                              padding: EdgeInsets.only(bottom: height * 0.018),
-
-                              child: reviewTile(
-                                width,
-
-                                review["review"] ?? "",
-
-                                review["studentId"]?["name"] ?? "Student",
-
-                                review["rating"] ?? 0,
-
-                                review["_id"] ?? "",
-                              ),
-                            );
-                          })
-                        else
-                          Center(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                vertical: height * 0.02,
-                              ),
-
-                              child: Text(
-                                "No Reviews Yet",
-
-                                style: TextStyle(
-                                  color: Colors.white54,
-
-                                  fontSize: width * 0.036,
+                                  value:
+                                      tutor!["qualification"] ??
+                                      "Not Available",
                                 ),
-                              ),
+
+                                SizedBox(height: height * 0.025),
+
+                                /// COURSE
+                                buildProfileItem(
+                                  width,
+
+                                  icon: Icons.menu_book_rounded,
+
+                                  title: "Course",
+
+                                  value:
+                                      tutor!["courseId"]?["name"] ??
+                                      "Not Available",
+                                ),
+
+                                SizedBox(height: height * 0.025),
+
+                                /// SUBJECTS
+                                buildProfileItem(
+                                  width,
+
+                                  icon: Icons.auto_stories_rounded,
+
+                                  title: "Subjects",
+
+                                  value: (tutor!["subjects"] ?? []).join(", "),
+                                ),
+
+                                SizedBox(height: height * 0.025),
+
+                                /// ABOUT
+                                buildProfileItem(
+                                  width,
+
+                                  icon: Icons.info_outline_rounded,
+
+                                  title: "About",
+
+                                  value:
+                                      tutor!["about"] != null &&
+                                          tutor!["about"].toString().isNotEmpty
+                                      ? tutor!["about"]
+                                      : "No About Information",
+                                ),
+                              ],
                             ),
                           ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(height: height * 0.035),
+                    SizedBox(height: height * 0.035),
 
-                  /// BUTTONS
-                  Row(
-                    children: [
-                      Expanded(
-                        child: buildButton(
-                          width,
+                    /// REVIEWS
+                    /// REVIEWS
+                    Container(
+                      width: double.infinity,
 
-                          title: "Write Review",
+                      padding: EdgeInsets.all(width * 0.05),
 
-                          color: const Color(0xFF8B5CF6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.06),
 
-                          onTap: () async {
-                            final result = await Navigator.push(
-                              context,
-
-                              MaterialPageRoute(
-                                builder: (_) => WriteReviewScreen(
-                                  tutorId: widget.tutorId,
-
-                                  token: widget.token,
-                                ),
-                              ),
-                            );
-
-                            if (result == true) {
-                              fetchTutorDetails();
-                            }
-                          },
-                        ),
+                        borderRadius: BorderRadius.circular(24),
                       ),
 
-                      SizedBox(width: width * 0.03),
-                     Expanded(
-  child: Consumer<ChatProvider>(
-    builder: (context, provider, child) {
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
 
-      
-      final isRequested = provider.rooms.any((room) {
-        final tutor = room["tutor"] ?? {};
+                        children: [
+                          /// TITLE
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.reviews_rounded,
 
-        return tutor["_id"] == widget.tutorId ||
-               tutor["id"] == widget.tutorId;
-      });
+                                color: Colors.amber,
 
-      return ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isRequested ? Colors.grey : Colors.green,
-        ),
-// onPressed: () async {
-//   final res = await context
-//       .read<ChatProvider>()
-//       .connectTutor(widget.tutorId, widget.token);
+                                size: width * 0.055,
+                              ),
 
-//   if (!mounted) return;
+                              SizedBox(width: width * 0.025),
 
-//   if (res == null || res is! Map<String, dynamic>) {
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       const SnackBar(content: Text("Request Failed (no response)")),
-//     );
-//     return;
-//   }
+                              Text(
+                                "Recent Reviews",
 
-//   final roomData = res["room"];
+                                style: TextStyle(
+                                  color: Colors.white,
 
-//   if (roomData == null || roomData is! Map<String, dynamic>) {
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       const SnackBar(content: Text("Request Failed (no room)")),
-//     );
-//     return;
-//   }
+                                  fontWeight: FontWeight.bold,
 
-//   final roomId = roomData["_id"];
+                                  fontSize: width * 0.045,
+                                ),
+                              ),
+                            ],
+                          ),
 
-//   if (roomId == null) {
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       const SnackBar(content: Text("Room ID missing")),
-//     );
-//     return;
-//   }
+                          SizedBox(height: height * 0.025),
 
-//   ScaffoldMessenger.of(context).showSnackBar(
-//     const SnackBar(content: Text("Request Sent")),
-//   );
+                          /// BACKEND REVIEWS
+                          if (tutor!["reviews"] != null &&
+                              tutor!["reviews"].isNotEmpty)
+                            ...List.generate(tutor!["reviews"].length, (index) {
+                              final review = tutor!["reviews"][index];
 
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: height * 0.018,
+                                ),
 
-// Navigator.push(
-//   context,
-//   MaterialPageRoute(
-//     builder: (_) => ChatRoomScreen(
-//       roomId: roomId,
-//       token: widget.token,
+                                child: reviewTile(
+                                  width,
 
-//       tutor: {
-//         "_id": tutor!["_id"],
-//         "name": tutor!["name"],
-//         "photo": tutor!["photo"],
-//         "qualification": tutor!["qualification"],
-//       },
-//     ),
-//   ),
-// );
-// },
+                                  review["review"] ?? "",
 
-onPressed: () async {
-  final chatProvider = context.read<ChatProvider>();
+                                  review["studentId"]?["name"] ?? "Student",
 
-  final res = await chatProvider.connectTutor(
-    widget.tutorId,
-    widget.token,
-  );
+                                  review["rating"] ?? 0,
 
-  if (!mounted) return;
+                                  review["_id"] ?? "",
+                                  review["studentId"]?["_id"] ?? "",
+                                ),
+                              );
+                            })
+                          else
+                            Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: height * 0.02,
+                                ),
 
-  if (res == null || res is! Map<String, dynamic>) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Request Failed")),
-    );
-    return;
-  }
+                                child: Text(
+                                  "No Reviews Yet",
 
-  final room = res["room"];
+                                  style: TextStyle(
+                                    color: Colors.white54,
 
-  if (room == null || room["_id"] == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Room not created")),
-    );
-    return;
-  }
-
-  final roomId = room["_id"];
-
-  /// ✅ IMPORTANT: refresh rooms before navigation (fix UI state)
-  await chatProvider.fetchRooms(widget.token);
-
-  if (!mounted) return;
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text("Request Sent Successfully")),
-  );
-
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (_) => ChatRoomScreen(
-        roomId: roomId,
-        token: widget.token,
-        tutor: {
-          "_id": widget.tutorId,
-          "name": tutor?["name"] ?? "",
-          "photo": tutor?["photo"] ?? "",
-          "qualification": tutor?["qualification"] ?? "",
-        },
-      ),
-    ),
-  );
-},
-
-        child: Text(
-          isRequested ? "Request Sent" : "Send Request",
-        ),
-      );
-    },
-  ),
-)
-                    ],
-                  ),
-
-                  SizedBox(height: height * 0.02),
-
-                  SizedBox(
-                    width: double.infinity,
-
-                    child: buildButton(
-                      width,
-
-                      title: "Contact Us",
-
-                      color: Colors.green,
-
-                      onTap: () {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => const ContactScreen(),
-    ),
-  );
-},
+                                    fontSize: width * 0.036,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
+                    SizedBox(height: height * 0.035),
 
-                  SizedBox(height: height * 0.04),
-                ],
+                    /// BUTTONS
+                    Row(
+                      children: [
+                        Expanded(
+                          child: buildButton(
+                            width,
+
+                            title: "Write Review",
+
+                            color: const Color(0xFF8B5CF6),
+
+                            onTap: () async {
+                              final result = await Navigator.push(
+                                context,
+
+                                MaterialPageRoute(
+                                  builder: (_) => WriteReviewScreen(
+                                    tutorId: widget.tutorId,
+
+                                    token: widget.token,
+                                  ),
+                                ),
+                              );
+
+                              if (result == true) {
+                                fetchTutorDetails();
+                              }
+                            },
+                          ),
+                        ),
+
+                        SizedBox(width: width * 0.03),
+                        Expanded(
+                          child: Consumer<ChatProvider>(
+                            builder: (context, provider, child) {
+                              final isRequested = provider.rooms.any((room) {
+                                final tutor = room["tutor"] ?? {};
+
+                                return tutor["_id"] == widget.tutorId ||
+                                    tutor["id"] == widget.tutorId;
+                              });
+
+                              return ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: isRequested
+                                      ? Colors.grey
+                                      : Colors.green,
+                                ),
+
+                                // onPressed: () async {
+                                //   final res = await context
+                                //       .read<ChatProvider>()
+                                //       .connectTutor(widget.tutorId, widget.token);
+
+                                //   if (!mounted) return;
+
+                                //   if (res == null || res is! Map<String, dynamic>) {
+                                //     ScaffoldMessenger.of(context).showSnackBar(
+                                //       const SnackBar(content: Text("Request Failed (no response)")),
+                                //     );
+                                //     return;
+                                //   }
+
+                                //   final roomData = res["room"];
+
+                                //   if (roomData == null || roomData is! Map<String, dynamic>) {
+                                //     ScaffoldMessenger.of(context).showSnackBar(
+                                //       const SnackBar(content: Text("Request Failed (no room)")),
+                                //     );
+                                //     return;
+                                //   }
+
+                                //   final roomId = roomData["_id"];
+
+                                //   if (roomId == null) {
+                                //     ScaffoldMessenger.of(context).showSnackBar(
+                                //       const SnackBar(content: Text("Room ID missing")),
+                                //     );
+                                //     return;
+                                //   }
+
+                                //   ScaffoldMessenger.of(context).showSnackBar(
+                                //     const SnackBar(content: Text("Request Sent")),
+                                //   );
+
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //     builder: (_) => ChatRoomScreen(
+                                //       roomId: roomId,
+                                //       token: widget.token,
+
+                                //       tutor: {
+                                //         "_id": tutor!["_id"],
+                                //         "name": tutor!["name"],
+                                //         "photo": tutor!["photo"],
+                                //         "qualification": tutor!["qualification"],
+                                //       },
+                                //     ),
+                                //   ),
+                                // );
+                                // },
+                                onPressed: () async {
+                                  final chatProvider = context
+                                      .read<ChatProvider>();
+
+                                  final res = await chatProvider.connectTutor(
+                                    widget.tutorId,
+                                    widget.token,
+                                  );
+
+                                  if (!mounted) return;
+
+                                  if (res == null ||
+                                      res is! Map<String, dynamic>) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text("Request Failed"),
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  final room = res["room"];
+
+                                  if (room == null || room["_id"] == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text("Room not created"),
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  final roomId = room["_id"];
+
+                                  /// ✅ IMPORTANT: refresh rooms before navigation (fix UI state)
+                                  await chatProvider.fetchRooms(widget.token);
+
+                                  if (!mounted) return;
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Request Sent Successfully",
+                                      ),
+                                    ),
+                                  );
+
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ChatRoomScreen(
+                                        roomId: roomId,
+                                        token: widget.token,
+                                        tutor: {
+                                          "_id": widget.tutorId,
+                                          "name": tutor?["name"] ?? "",
+                                          "photo": tutor?["photo"] ?? "",
+                                          "qualification":
+                                              tutor?["qualification"] ?? "",
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+
+                                child: Text(
+                                  isRequested ? "Request Sent" : "Send Request",
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: height * 0.02),
+
+                    SizedBox(
+                      width: double.infinity,
+
+                      child: buildButton(
+                        width,
+
+                        title: "Contact Us",
+
+                        color: Colors.green,
+
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ContactScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
+                    SizedBox(height: height * 0.04),
+                  ],
+                ),
               ),
-            ),
             ),
     );
   }
@@ -792,7 +833,20 @@ onPressed: () async {
     dynamic rating,
 
     String reviewId,
+    String reviewOwnerId,
   ) {
+    final myId = Provider.of<AuthProvider>(context, listen: true).userId;
+
+    final isOwner =
+        myId != null && myId!.isNotEmpty && myId.trim() == reviewOwnerId.trim();
+
+    print("MY ID = $myId");
+    print("OWNER ID = $reviewOwnerId");
+    print("IS OWNER = $isOwner");
+    print(
+"AUTH PROVIDER ID = "
+"${context.read<AuthProvider>().userId}"
+);
     return Container(
       padding: EdgeInsets.all(width * 0.04),
 
@@ -821,55 +875,49 @@ onPressed: () async {
                 }),
               ),
 
-              PopupMenuButton(
-                color: const Color(0xFF1E1B4B),
+              if (isOwner)
+                PopupMenuButton(
+                  color: const Color(0xFF1E1B4B),
 
-                icon: const Icon(Icons.more_vert, color: Colors.white),
+                  icon: const Icon(Icons.more_vert, color: Colors.white),
 
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: "edit",
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: "edit",
+                      child: Text("Edit Review"),
+                    ),
 
-                    child: Text("Edit Review"),
-                  ),
+                    const PopupMenuItem(
+                      value: "delete",
+                      child: Text("Delete Review"),
+                    ),
+                  ],
 
-                  const PopupMenuItem(
-                    value: "delete",
-
-                    child: Text("Delete Review"),
-                  ),
-                ],
-
-                onSelected: (value) {
-                  if (value == "edit") {
-                    Navigator.push(
-                      context,
-
-                      MaterialPageRoute(
-                        builder: (_) => WriteReviewScreen(
-                          tutorId: widget.tutorId,
-
-                          token: widget.token,
-
-                          reviewId: reviewId,
-
-                          existingReview: review,
-
-                          existingRating: rating.toDouble(),
+                  onSelected: (value) {
+                    if (value == "edit") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => WriteReviewScreen(
+                            tutorId: widget.tutorId,
+                            token: widget.token,
+                            reviewId: reviewId,
+                            existingReview: review,
+                            existingRating: rating.toDouble(),
+                          ),
                         ),
-                      ),
-                    ).then((value) {
-                      if (value == true) {
-                        fetchTutorDetails();
-                      }
-                    });
-                  }
+                      ).then((value) {
+                        if (value == true) {
+                          fetchTutorDetails();
+                        }
+                      });
+                    }
 
-                  if (value == "delete") {
-                    deleteReview();
-                  }
-                },
-              ),
+                    if (value == "delete") {
+                      deleteReview();
+                    }
+                  },
+                ),
             ],
           ),
 

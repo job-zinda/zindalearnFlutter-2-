@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:zindaonlineschool/core/utils/responsive.dart';
 import 'package:zindaonlineschool/providers/chat_provider.dart';
+import 'package:zindaonlineschool/screens/tutor/tutor_detailes_screen.dart';
 import 'package:zindaonlineschool/widgets/responsive_body.dart';
 import 'package:zindaonlineschool/widgets/custom_snackbar.dart';
 import 'package:record/record.dart';
@@ -145,6 +147,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     setState(() => isRecording = false);
 
     if (path != null) {
+      // ignore: use_build_context_synchronously
       final chat = context.read<ChatProvider>();
 
       await chat.sendVoiceMessage(widget.roomId, File(path), widget.token);
@@ -162,14 +165,21 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   }
 
   /// FORMAT DATE
+  // String formatDate(String? date) {
+  //   if (date == null) return "";
+  //   try {
+  //     final dt = DateTime.parse(date);
+  //     return "${dt.day}/${dt.month}/${dt.year}  ${dt.hour}:${dt.minute}";
+  //   } catch (e) {
+  //     return "";
+  //   }
+  // }
   String formatDate(String? date) {
     if (date == null) return "";
-    try {
-      final dt = DateTime.parse(date);
-      return "${dt.day}/${dt.month}/${dt.year}  ${dt.hour}:${dt.minute}";
-    } catch (e) {
-      return "";
-    }
+
+    final dt = DateTime.parse(date).toLocal();
+
+    return DateFormat('dd/MM/yyyy hh:mm a').format(dt);
   }
 
   // ================= NORMAL MESSAGE =================
@@ -191,6 +201,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         decoration: BoxDecoration(
           color: isMe
               ? const Color.fromARGB(255, 78, 35, 131)
+              // ignore: deprecated_member_use
               : Colors.white.withOpacity(0.06),
 
           borderRadius: BorderRadius.circular(18),
@@ -199,6 +210,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
           boxShadow: [
             BoxShadow(
+              // ignore: deprecated_member_use
               color: Colors.black.withOpacity(0.2),
               blurRadius: 8,
               offset: const Offset(0, 4),
@@ -271,6 +283,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                         widget.token,
                       );
 
+                      // ignore: use_build_context_synchronously
                       CustomSnackbar.success(context, "Deleted");
                     },
                   ),
@@ -297,6 +310,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         padding: const EdgeInsets.all(14),
 
         decoration: BoxDecoration(
+          // ignore: deprecated_member_use
           color: Colors.white.withOpacity(0.06),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.white12),
@@ -347,14 +361,50 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               msg["text"] ?? "",
               style: const TextStyle(color: Colors.white),
             ),
-
+            
             const SizedBox(height: 6),
 
             /// TIME FIXED HERE TOO
             Text(
               formatDate(msg["createdAt"]),
               style: const TextStyle(color: Colors.white54, fontSize: 10),
+            ),const SizedBox(height: 10),
+
+            Align(
+              alignment: Alignment.centerLeft,
+
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.purpleAccent,
+                  padding: EdgeInsets.zero,
+                ),
+                onPressed: () {
+                  final tutorId = card["tuterId"]?.toString();
+
+                  if (tutorId == null) {
+                    CustomSnackbar.error(context, "Tutor ID not found");
+
+                    return;
+                  }
+
+                  Navigator.push(
+                    context,
+
+                    MaterialPageRoute(
+                      builder: (_) => TutorDetailsScreen(
+                        tutorId: tutorId,
+                        token: widget.token,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text(
+                  "Tap to View Tutor Details",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
+
 
             if (isMe)
               Row(
@@ -386,6 +436,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                         widget.token,
                       );
 
+                      // ignore: use_build_context_synchronously
                       CustomSnackbar.success(context, "Deleted");
                     },
                   ),
@@ -440,6 +491,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
 
               decoration: BoxDecoration(
+                // ignore: deprecated_member_use
                 color: Colors.white.withOpacity(0.06),
                 borderRadius: BorderRadius.circular(25),
                 border: Border.all(color: Colors.white12),

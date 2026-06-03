@@ -169,6 +169,7 @@ class _SessionScreenState
                             BoxShadow(
 
                               color:
+                                  // ignore: deprecated_member_use
                                   Colors.black.withOpacity(
                                 0.22,
                               ),
@@ -208,6 +209,7 @@ class _SessionScreenState
                                     BoxDecoration(
 
                                   color:
+                                      // ignore: deprecated_member_use
                                       Colors.white.withOpacity(
                                     0.1,
                                   ),

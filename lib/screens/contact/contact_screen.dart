@@ -31,6 +31,7 @@ class ContactScreen extends StatelessWidget {
               width: double.infinity,
               padding: Responsive.screenPadding(context),
               decoration: BoxDecoration(
+                // ignore: deprecated_member_use
                 color: Colors.white.withOpacity(0.95),
                 borderRadius: BorderRadius.circular(25),
                 boxShadow: const [
@@ -102,6 +103,7 @@ class ContactScreen extends StatelessWidget {
           border: Border.all(color: Colors.grey.shade200),
           boxShadow: [
             BoxShadow(
+              // ignore: deprecated_member_use
               color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 5),
@@ -114,6 +116,7 @@ class ContactScreen extends StatelessWidget {
               height: 50,
               width: 50,
               decoration: BoxDecoration(
+                // ignore: deprecated_member_use
                 color: color.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(12),
               ),

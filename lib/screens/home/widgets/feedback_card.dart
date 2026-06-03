@@ -30,6 +30,7 @@ class FeedbackCard extends StatelessWidget {
           Row(
             children: [
               CircleAvatar(
+                // ignore: deprecated_member_use
                 backgroundColor: Colors.blue.withOpacity(0.2),
                 child: const Icon(
                   Icons.person,

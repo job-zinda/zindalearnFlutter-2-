@@ -48,7 +48,7 @@ class ChatService {
     String token,
 ) async {
 
-  final res = await http.post(
+  await http.post(
 
     Uri.parse(
       "$baseUrl/chat/message/$roomId",
@@ -72,13 +72,13 @@ class ChatService {
     }),
   );
 
-  print(
-    "SEND STATUS: ${res.statusCode}",
-  );
+  // print(
+  //   "SEND STATUS: ${res.statusCode}",
+  // );
 
-  print(
-    "SEND BODY: ${res.body}",
-  );
+  // print(
+  //   "SEND BODY: ${res.body}",
+  // );
 }
 
   /// MARK AS READ

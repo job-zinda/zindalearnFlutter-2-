@@ -29,6 +29,7 @@ class CategoryCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: width * 0.08,
+                // ignore: deprecated_member_use
                 backgroundColor: Colors.blue.withOpacity(0.2),
                 child: Icon(
                   Icons.school,

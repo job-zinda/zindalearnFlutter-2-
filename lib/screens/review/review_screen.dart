@@ -100,6 +100,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
                 padding: EdgeInsets.symmetric(vertical: height * 0.025),
 
                 decoration: BoxDecoration(
+                  // ignore: deprecated_member_use
                   color: Colors.white.withOpacity(0.06),
 
                   borderRadius: BorderRadius.circular(24),
@@ -177,6 +178,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
 
               Container(
                 decoration: BoxDecoration(
+                  // ignore: deprecated_member_use
                   color: Colors.white.withOpacity(0.06),
 
                   borderRadius: BorderRadius.circular(24),
@@ -282,6 +284,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
 
                                  Navigator.pop(context, true);
                               } else {
+                                // ignore: use_build_context_synchronously
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     backgroundColor: Colors.red,

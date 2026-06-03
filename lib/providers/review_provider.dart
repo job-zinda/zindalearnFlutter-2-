@@ -3,45 +3,30 @@ import 'package:flutter/material.dart';
 import '../services/home_service.dart';
 
 class ReviewProvider with ChangeNotifier {
-
-  final HomeService _service =
-      HomeService();
+  final HomeService _service = HomeService();
+  String? _studentId;
+  String? get studentId => _studentId;
 
   bool _isLoading = false;
 
-  bool get isLoading =>
-      _isLoading;
+  bool get isLoading => _isLoading;
 
   double _rating = 0;
 
-  double get rating =>
-      _rating;
+  double get rating => _rating;
 
-  final TextEditingController
-      reviewController =
-      TextEditingController();
+  final TextEditingController reviewController = TextEditingController();
 
   /// UPDATE STAR
-  void updateRating(
-    double value,
-  ) {
-
+  void updateRating(double value) {
     _rating = value;
 
     notifyListeners();
   }
 
   /// SET OLD REVIEW
-  void setExistingReview({
-
-    required String review,
-
-    required double rating,
-
-  }) {
-
-    reviewController.text =
-        review;
+  void setExistingReview({required String review, required double rating}) {
+    reviewController.text = review;
 
     _rating = rating;
 
@@ -50,18 +35,11 @@ class ReviewProvider with ChangeNotifier {
 
   /// ADD REVIEW
   Future<bool> submitReview({
-
     required String tutorId,
 
     required String token,
-
   }) async {
-
-    if (_rating == 0 ||
-        reviewController.text
-            .trim()
-            .isEmpty) {
-
+    if (_rating == 0 || reviewController.text.trim().isEmpty) {
       return false;
     }
 
@@ -70,34 +48,22 @@ class ReviewProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-
-      final success =
-          await _service
-              .submitReview(
-
+      final success = await _service.submitReview(
         tutorId: tutorId,
 
         token: token,
 
         rating: _rating,
 
-        review:
-            reviewController.text
-                .trim(),
+        review: reviewController.text.trim(),
       );
 
       return success;
-
     } catch (e) {
-
-      debugPrint(
-        e.toString(),
-      );
+      debugPrint(e.toString());
 
       return false;
-
     } finally {
-
       _isLoading = false;
 
       notifyListeners();
@@ -106,36 +72,37 @@ class ReviewProvider with ChangeNotifier {
 
   /// UPDATE REVIEW
   Future<bool> updateReview({
-  required String tutorId,
-  required String reviewId,
-  required String token,
-}) async {
-
-  _isLoading = true;
-  notifyListeners();
-
-  try {
-    return await _service.updateReview(
-      tutorId: tutorId,
-      // reviewId: reviewId,
-      token: token,
-      rating: _rating,
-      review: reviewController.text.trim(),
-    );
-  } finally {
-    _isLoading = false;
+    required String tutorId,
+    required String reviewId,
+    required String token,
+  }) async {
+    _isLoading = true;
     notifyListeners();
-  }
-}
 
+    try {
+      return await _service.updateReview(
+        tutorId: tutorId,
+        // reviewId: reviewId,
+        token: token,
+        rating: _rating,
+        review: reviewController.text.trim(),
+      );
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   /// CLEAR
   void clearReview() {
-
     _rating = 0;
 
     reviewController.clear();
 
     notifyListeners();
+  }
+
+  void setStudentId(String id) {
+    _studentId = id;
   }
 }

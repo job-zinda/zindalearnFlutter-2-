@@ -267,7 +267,6 @@ import 'package:provider/provider.dart';
 import 'package:zindaonlineschool/core/constants/app_space.dart';
 import 'package:zindaonlineschool/screens/auth/forgot_password_screen.dart';
 import 'package:zindaonlineschool/screens/dashboard/dashborad_screen.dart';
-import 'package:zindaonlineschool/screens/home/home_screen/home_screen.dart';
 import 'package:zindaonlineschool/widgets/custom_snackbar.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/utils/validators.dart';

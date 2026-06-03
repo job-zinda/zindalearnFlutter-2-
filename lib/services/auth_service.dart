@@ -17,10 +17,10 @@ class AuthApiService {
           ? {"email": email.trim(), "pass": password.trim()}
           : {"phone": email.trim(), "pass": password.trim()};
 
-      print("URL: $url");
+      // print("URL: $url");
 
-      print("LOGIN BODY:");
-      print(bodyData);
+      // print("LOGIN BODY:");
+      // print(bodyData);
 
       final response = await http.post(
         url,
@@ -28,9 +28,9 @@ class AuthApiService {
         body: jsonEncode(bodyData),
       );
 
-      print("STATUS CODE: ${response.statusCode}");
+      // print("STATUS CODE: ${response.statusCode}");
 
-      print("LOGIN RESPONSE: ${response.body}");
+      // print("LOGIN RESPONSE: ${response.body}");
 
       // return jsonDecode(response.body);
 
@@ -45,7 +45,7 @@ if (response.statusCode == 200) {
   };
 }
     } catch (e) {
-      print("LOGIN ERROR: $e");
+      // print("LOGIN ERROR: $e");
 
       return {"msg": "Network error"};
     }
@@ -87,8 +87,8 @@ if (response.statusCode == 200) {
         body: jsonEncode({"email": email}),
       );
 
-      print("SEND OTP RESPONSE: ${response.body}");
-      print("STATUS CODE: ${response.statusCode}");
+      // print("SEND OTP RESPONSE: ${response.body}");
+      // print("STATUS CODE: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -114,7 +114,7 @@ if (response.statusCode == 200) {
         body: jsonEncode({"email": email, "otp": otp}),
       );
 
-      print("VERIFY OTP RESPONSE: ${response.body}");
+      // print("VERIFY OTP RESPONSE: ${response.body}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -141,8 +141,8 @@ if (response.statusCode == 200) {
         "confirmpass": password.trim(),
       };
 
-      print("FINAL RESET METHOD");
-      print(bodyData);
+      // print("FINAL RESET METHOD");
+      // print(bodyData);
 
       final response = await http.post(
         url,
@@ -150,12 +150,12 @@ if (response.statusCode == 200) {
         body: jsonEncode(bodyData),
       );
 
-      print("STATUS CODE: ${response.statusCode}");
-      print("RAW RESPONSE: ${response.body}");
+      // print("STATUS CODE: ${response.statusCode}");
+      // print("RAW RESPONSE: ${response.body}");
 
       return jsonDecode(response.body);
     } catch (e) {
-      print("RESET ERROR: $e");
+      // print("RESET ERROR: $e");
 
       return {"msg": "Network error"};
     }

@@ -34,6 +34,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
     super.initState();
 
     Future.microtask(() {
+      // ignore: use_build_context_synchronously
       context.read<CourseProvider>().fetchCourses(widget.categoryId);
     });
   }
@@ -94,9 +95,10 @@ class _CoursesScreenState extends State<CoursesScreen> {
       return ListView.separated(
         padding: padding,
         itemCount: courses.length,
-        separatorBuilder: (_, __) =>
+        separatorBuilder: (_, _) =>
             SizedBox(height: Responsive.spacing(context, 0.025)),
-        itemBuilder: (context, index) => _buildCourseCard(context, courses[index]),
+        itemBuilder: (context, index) =>
+            _buildCourseCard(context, courses[index]),
       );
     }
 
@@ -114,7 +116,8 @@ class _CoursesScreenState extends State<CoursesScreen> {
           desktop: 0.72,
         ),
       ),
-      itemBuilder: (context, index) => _buildCourseCard(context, courses[index]),
+      itemBuilder: (context, index) =>
+          _buildCourseCard(context, courses[index]),
     );
   }
 
@@ -138,6 +141,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
+                // ignore: deprecated_member_use
                 color: Colors.black.withOpacity(0.22),
                 blurRadius: 14,
                 offset: const Offset(0, 6),
@@ -157,7 +161,11 @@ class _CoursesScreenState extends State<CoursesScreen> {
                         ? CachedAppImage(url: course.image, fit: BoxFit.cover)
                         : ColoredBox(
                             color: Colors.white,
-                            child: Icon(Icons.school, size: imageSize * 0.5, color: Colors.grey),
+                            child: Icon(
+                              Icons.school,
+                              size: imageSize * 0.5,
+                              color: Colors.grey,
+                            ),
                           ),
                   ),
                 ),

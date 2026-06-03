@@ -112,6 +112,7 @@ context
       .fetchMyFeedback(widget.token);
 
   Navigator.push(
+    // ignore: use_build_context_synchronously
     context,
     MaterialPageRoute(
       builder: (_) =>
@@ -149,7 +150,7 @@ context
 
           const SizedBox(height: 30),
 
-          /// LOGOUT BUTTON 🔴
+          /// LOGOUT BUTTON 
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
@@ -163,6 +164,7 @@ context
               await prefs.remove("token");
 
               Navigator.pushAndRemoveUntil(
+                // ignore: use_build_context_synchronously
                 context,
                 MaterialPageRoute(builder: (_) => const LoginScreen()),
                 (route) => false,
@@ -183,10 +185,12 @@ context
   Widget _buildCard({required Widget child}) {
     return Container(
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: Colors.white.withOpacity(0.06),
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.2),
             blurRadius: 10,
             offset: const Offset(0, 5),

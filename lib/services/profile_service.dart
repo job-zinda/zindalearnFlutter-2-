@@ -22,7 +22,7 @@ class ProfileService {
         },
       );
 
-      print(response.body);
+      // print(response.body);
 
       return jsonDecode(response.body);
 
@@ -53,11 +53,11 @@ class ProfileService {
         body: jsonEncode({
           "name": name,
           "phone": phone,
-          if (photo != null) "photo": photo,
+          "photo": ?photo,
         }),
       );
 
-      print(response.body);
+      // print(response.body);
 
       return jsonDecode(response.body);
 
@@ -84,7 +84,7 @@ class ProfileService {
         },
       );
 
-      print(response.body);
+      // print(response.body);
 
       return jsonDecode(response.body);
 

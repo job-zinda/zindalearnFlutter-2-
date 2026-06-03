@@ -15,6 +15,14 @@ class AuthProvider with ChangeNotifier {
   String? _emailForReset;
   String? _storedOtp;
 
+  String? _userId;
+  String? get userId => _userId;
+
+  void setUserId(String id) {
+  _userId = id;
+  notifyListeners();
+}
+
   // getters
   String? get emailForReset => _emailForReset;
   String? get storedOtp => _storedOtp;
@@ -29,43 +37,98 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<(bool, dynamic)> login({
-    required String email,
-    required String password,
-  }) async {
-    _isLoading = true;
-    notifyListeners();
+Future<(bool, dynamic)> login({
+  required String email,
+  required String password,
+}) async {
 
-    try {
-      final res = await AuthApiService.login(email: email, password: password);
+  _isLoading = true;
+  notifyListeners();
 
-      print(res);
+  try {
 
-      // // CHECK TOKEN INSTEAD OF MSG
-      // if (res["token"] != null) {
-      //   return (true, res);
-      // }
-      if (res["token"] != null) {
+    final res = await AuthApiService.login(
+      email: email,
+      password: password,
+    );
 
-  final prefs = await SharedPreferences.getInstance();
+    print("FULL RESPONSE = $res");
+
+   if (res["token"] != null) {
+
+  final prefs =
+      await SharedPreferences.getInstance();
 
   await prefs.setString(
     "token",
     res["token"],
   );
 
+
+
+  print("student = ${res["student"]}");
+  print("user = ${res["user"]}");
+  print("data = ${res["data"]}");
+  print("root = ${res["_id"]}");
+
+  _userId =
+      res["student"]?["_id"]?.toString() ??
+      res["user"]?["id"]?.toString() ??   // ← FIXED HERE
+      res["data"]?["_id"]?.toString() ??
+      res["_id"]?.toString() ??
+      "";
+
+  print("EXTRACTED USER ID = $_userId");
+
+  if (_userId != null &&
+      _userId!.trim().isNotEmpty) {
+
+    await prefs.setString(
+      "userId",
+      _userId!,
+    );
+
+  }
+
+  await loadUser();
+
   return (true, res);
 }
 
-      return (false, {"msg": res["msg"] ?? "Login failed"});
-    } catch (e) {
-      return (false, {"msg": "Something went wrong"});
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
+    return (
+      false,
+      {"msg":res["msg"] ?? "Login failed"},
+    );
 
+  } catch(e){
+
+    print("LOGIN ERROR = $e");
+
+    return (
+      false,
+      {"msg":"Something went wrong"},
+    );
+
+  } finally {
+
+    _isLoading = false;
+    notifyListeners();
+  }
+}
+
+
+Future<void> loadUser() async {
+
+  final prefs =
+      await SharedPreferences.getInstance();
+
+  _userId =
+      prefs.getString("userId");
+
+
+
+  notifyListeners();
+}
   // ---------------- REGISTER ----------------
   Future<(bool, dynamic)> register({
     required String name,
@@ -134,7 +197,7 @@ class AuthProvider with ChangeNotifier {
     try {
       final res = await AuthApiService.verifyOtp(email: email, otp: otp);
 
-      print(res);
+      // print(res);
 
       if (res["msg"] == "OTP verified") {
         _storedOtp = otp;
@@ -166,7 +229,7 @@ class AuthProvider with ChangeNotifier {
         password: password,
       );
 
-      print(res);
+      // print(res);
 
       if (res["msg"] == "Password reset successful") {
         return (true, res["msg"]);
@@ -180,14 +243,25 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     }
   }
-Future<void> logout() async {
+
+  // Future<void> logout() async {
+  //   final prefs = await SharedPreferences.getInstance();
+
+  //   await prefs.clear();
+
+  //   notifyListeners();
+  // }
+
+  Future<void> logout() async {
 
   final prefs =
       await SharedPreferences.getInstance();
 
   await prefs.clear();
 
+  _userId = "";
+
   notifyListeners();
 }
-
 }
+

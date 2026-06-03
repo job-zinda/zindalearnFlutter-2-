@@ -175,8 +175,9 @@ class _EditProfileScreenState
                                 .trim(),
                       );
 
-                      if (!context.mounted)
+                      if (!context.mounted) {
                         return;
+                      }
 
                       ScaffoldMessenger.of(
                         context,
@@ -221,6 +222,7 @@ class _EditProfileScreenState
   }) {
     return Container(
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: Colors.white.withOpacity(
           0.06,
         ),
@@ -230,6 +232,7 @@ class _EditProfileScreenState
 
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(
               0.2,
             ),

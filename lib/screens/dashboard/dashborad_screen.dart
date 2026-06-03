@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zindaonlineschool/core/utils/responsive.dart';
 import 'package:zindaonlineschool/providers/chat_provider.dart';
+import 'package:zindaonlineschool/providers/tutor_provider.dart';
 import 'package:zindaonlineschool/screens/chat/chat_room_screen.dart';
 import 'package:zindaonlineschool/screens/home/home_screen/home_screen.dart';
 import 'package:zindaonlineschool/screens/settings/settings_screen.dart';
@@ -12,10 +13,7 @@ import 'package:zindaonlineschool/widgets/custom_bootom_nav.dart';
 class DashboardScreen extends StatefulWidget {
   final String token;
 
-  const DashboardScreen({
-    super.key,
-    required this.token,
-  });
+  const DashboardScreen({super.key, required this.token});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -29,12 +27,60 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String? roomId;
   bool _chatLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _screenForIndex(0);
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _screenForIndex(0);
+  // }
+  // @override
+  // void initState() {
+  //   super.initState();
 
+  //   /// load Home immediately
+  //   _screenForIndex(0);
+
+  //   /// preload Tutors in background
+  //   // Future.microtask(() {
+  //   //   _screenForIndex(1);
+  //   // });
+  //   Future.microtask(() async {
+  //     _screenForIndex(1);
+
+  //     await context.read<TutorProvider>().fetchTutors(null, widget.token);
+  //   });
+  // }
+
+@override
+void initState() {
+  super.initState();
+
+  /// Load Home immediately
+  _screenForIndex(0);
+
+  /// Pre-create Tutors screen
+  _screenForIndex(1);
+
+  /// Load tutors AFTER dashboard renders
+  WidgetsBinding.instance
+      .addPostFrameCallback((_) {
+
+    Future.delayed(
+      const Duration(seconds: 2),
+
+      () {
+
+        if (!mounted) return;
+
+        context
+            .read<TutorProvider>()
+            .fetchTutors(
+              null,
+              widget.token,
+            );
+      },
+    );
+  });
+}
   Widget _screenForIndex(int index) {
     if (_lazyScreens[index] != null) {
       return _lazyScreens[index]!;
@@ -75,19 +121,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       if (provider.rooms.isNotEmpty) {
         roomId = provider.rooms.first["_id"];
-        _lazyScreens[2] = ChatRoomScreen(
-          roomId: roomId!,
-          token: widget.token,
-        );
+        _lazyScreens[2] = ChatRoomScreen(roomId: roomId!, token: widget.token);
         setState(() {
           currentIndex = 2;
           _chatLoading = false;
         });
       } else {
         setState(() => _chatLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("No chat rooms found")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("No chat rooms found")));
       }
       return;
     }
@@ -101,12 +144,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildMainContent() {
     return Stack(
       children: [
+        // IndexedStack(
+        //   index: currentIndex,
+        //   children: List.generate(
+        //     4,
+        //     (i) => _lazyScreens[i] ?? const SizedBox.shrink(),
+        //   ),
+        // ),
         IndexedStack(
           index: currentIndex,
-          children: List.generate(
-            4,
-            (i) => _lazyScreens[i] ?? const SizedBox.shrink(),
-          ),
+
+          children: [
+            _screenForIndex(0),
+
+            _screenForIndex(1),
+
+            _lazyScreens[2] ?? const SizedBox(),
+
+            _screenForIndex(3),
+          ],
         ),
         if (_chatLoading)
           const ColoredBox(
@@ -132,7 +188,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               currentIndex: currentIndex,
               onDestinationSelected: changeTab,
             ),
-            const VerticalDivider(width: 1, thickness: 1, color: Colors.white12),
+            const VerticalDivider(
+              width: 1,
+              thickness: 1,
+              color: Colors.white12,
+            ),
             Expanded(child: _buildMainContent()),
           ],
         ),

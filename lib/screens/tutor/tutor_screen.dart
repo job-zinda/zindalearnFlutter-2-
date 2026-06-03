@@ -13,11 +13,13 @@ class TutorsScreen extends StatefulWidget {
   final String courseTitle;
   final String token;
 
+
   const TutorsScreen({
     super.key,
     required this.courseId,
     required this.courseTitle,
     required this.token,
+    
   });
 
   @override
@@ -25,22 +27,22 @@ class TutorsScreen extends StatefulWidget {
 }
 
 class _TutorsScreenState extends State<TutorsScreen> {
-  @override
-  void initState() {
-    super.initState();
+  //   @override
+  //   void initState() {
+  //     super.initState();
 
-    // Future.microtask(() {
-    //   context.read<TutorProvider>().fetchTutors(widget.courseId, widget.token);
-    // })
-   final isAllTutors = widget.courseId.isEmpty;
+  //     // Future.microtask(() {
+  //     //   context.read<TutorProvider>().fetchTutors(widget.courseId, widget.token);
+  //     // })
+  //    final isAllTutors = widget.courseId.isEmpty;
 
-Future.microtask(() {
-  context.read<TutorProvider>().fetchTutors(
-    isAllTutors ? null : widget.courseId,
-    widget.token,
-  );
-});
-  }
+  // Future.microtask(() {
+  //   context.read<TutorProvider>().fetchTutors(
+  //     isAllTutors ? null : widget.courseId,
+  //     widget.token,
+  //   );
+  // });
+  //   }
 
   double getAverageRating(List reviews) {
     if (reviews.isEmpty) return 0;
@@ -81,7 +83,7 @@ Future.microtask(() {
         ),
       ),
 
-      body: provider.isLoading
+      body: provider.isLoading && provider.tutors.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : provider.tutors.isEmpty
           ? const Center(
@@ -106,7 +108,7 @@ Future.microtask(() {
       return ListView.separated(
         padding: padding,
         itemCount: provider.tutors.length,
-        separatorBuilder: (_, __) =>
+        separatorBuilder: (_, _) =>
             SizedBox(height: Responsive.spacing(context, 0.025)),
         itemBuilder: (context, index) =>
             _buildTutorCard(context, provider.tutors[index]),
@@ -163,6 +165,7 @@ Future.microtask(() {
             ),
             boxShadow: [
               BoxShadow(
+                // ignore: deprecated_member_use
                 color: Colors.black.withOpacity(0.25),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
@@ -190,7 +193,11 @@ Future.microtask(() {
                             ? CachedNetworkImageProvider(tutor.image)
                             : null,
                         child: tutor.image.isEmpty
-                            ? Icon(Icons.person, size: avatarR, color: Colors.grey)
+                            ? Icon(
+                                Icons.person,
+                                size: avatarR,
+                                color: Colors.grey,
+                              )
                             : null,
                       ),
                     ),
@@ -212,10 +219,16 @@ Future.microtask(() {
                           const SizedBox(height: 6),
                           Row(
                             children: [
-                              const Icon(Icons.star, color: Colors.amber, size: 16),
+                              const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                                size: 16,
+                              ),
                               const SizedBox(width: 4),
                               Text(
-                                getAverageRating(tutor.reviews).toStringAsFixed(1),
+                                getAverageRating(
+                                  tutor.reviews,
+                                ).toStringAsFixed(1),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: bodySize,
@@ -235,7 +248,11 @@ Future.microtask(() {
                     tutor.qualification,
                     maxLines: isGrid ? 2 : 4,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.white70, fontSize: bodySize, height: 1.4),
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: bodySize,
+                      height: 1.4,
+                    ),
                   ),
                 ],
                 if (tutor.experience.isNotEmpty && !isGrid) ...[
@@ -244,7 +261,11 @@ Future.microtask(() {
                     tutor.experience,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.white70, fontSize: bodySize, height: 1.4),
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: bodySize,
+                      height: 1.4,
+                    ),
                   ),
                 ],
                 SizedBox(height: Responsive.spacing(context, 0.018)),
@@ -263,8 +284,11 @@ Future.microtask(() {
                         context,
                         MaterialPageRoute(
                           builder: (_) => TutorDetailsScreen(
+                            
                             tutorId: tutor.id,
                             token: widget.token,
+                           
+                           
                           ),
                         ),
                       );

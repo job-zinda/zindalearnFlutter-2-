@@ -50,152 +50,150 @@ class _HomeScreenState extends State<HomeScreen> {
           "Zinda Online",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-
-       
       ),
 
       body: RefreshIndicator(
-              onRefresh: () async {
-                await Future.wait([
-                  provider.refreshHomeData(widget.token),
-                  context.read<FeedbackProvider>().fetchAllUsersFeedback(
-                        widget.token,
-                        force: true,
+        onRefresh: () async {
+          await Future.wait([
+            provider.refreshHomeData(widget.token),
+            context.read<FeedbackProvider>().fetchAllUsersFeedback(
+              widget.token,
+              force: true,
+            ),
+          ]);
+        },
+
+        child: ResponsiveBody(
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+
+              children: [
+                _buildWelcomeSection(context),
+
+                if (provider.errorMessage != null) ...[
+                  SizedBox(height: Responsive.spacing(context, 0.02)),
+                  _buildErrorBanner(provider.errorMessage!),
+                ],
+
+                SizedBox(height: Responsive.spacing(context, 0.03)),
+
+                if (provider.isLoading && !provider.hasContent)
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: Responsive.spacing(context, 0.08),
+                    ),
+                    child: const Center(
+                      child: Column(
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 12),
+                          Text(
+                            "Loading courses…",
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ],
                       ),
-                ]);
-              },
+                    ),
+                  )
+                else
+                  _buildBannerSection(context, provider),
 
-              child: ResponsiveBody(
-                child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
-                ),
+                SizedBox(height: Responsive.spacing(context, 0.04)),
 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                _buildSectionTitle(context, "Our Courses"),
 
-                  children: [
-                    _buildWelcomeSection(context),
+                SizedBox(height: Responsive.spacing(context, 0.02)),
 
-                    if (provider.errorMessage != null) ...[
-                      SizedBox(height: Responsive.spacing(context, 0.02)),
-                      _buildErrorBanner(provider.errorMessage!),
-                    ],
+                _buildCategorySection(context, provider),
 
-                    SizedBox(height: Responsive.spacing(context, 0.03)),
+                SizedBox(height: Responsive.spacing(context, 0.04)),
 
-                    if (provider.isLoading && !provider.hasContent)
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: Responsive.spacing(context, 0.08),
-                        ),
-                        child: const Center(
+                _buildSectionTitle(context, "What Students Say"),
+
+                SizedBox(height: Responsive.spacing(context, 0.02)),
+
+                // _buildFeedbackSection(provider, width, height),
+                Consumer<FeedbackProvider>(
+                  builder: (context, provider, child) {
+                    if (provider.isLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (provider.allFeedback.isEmpty) {
+                      return const Text(
+                        "No Feedback Found",
+                        style: TextStyle(color: Colors.white),
+                      );
+                    }
+
+                    final count = provider.allFeedback.length.clamp(0, 5);
+
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: count,
+
+                      itemBuilder: (context, index) {
+                        final item = provider.allFeedback[index];
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white10,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              CircularProgressIndicator(),
-                              SizedBox(height: 12),
                               Text(
-                                "Loading courses…",
-                                style: TextStyle(color: Colors.white70),
+                                item["studentId"]?["name"] ?? "Student",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+
+                              const SizedBox(height: 8),
+
+                              Text(
+                                item["message"] ?? "",
+                                style: const TextStyle(color: Colors.white70),
+                              ),
+
+                              const SizedBox(height: 8),
+
+                              Row(
+                                children: List.generate(5, (i) {
+                                  return Icon(
+                                    i < (item["rating"] ?? 0)
+                                        ? Icons.star
+                                        : Icons.star_border,
+                                    color: Colors.amber,
+                                    size: 16,
+                                  );
+                                }),
                               ),
                             ],
                           ),
-                        ),
-                      )
-                    else
-                      _buildBannerSection(context, provider),
-
-                    SizedBox(height: Responsive.spacing(context, 0.04)),
-
-                    _buildSectionTitle(context, "Our Courses"),
-
-                    SizedBox(height: Responsive.spacing(context, 0.02)),
-
-                    _buildCategorySection(context, provider),
-
-                    SizedBox(height: Responsive.spacing(context, 0.04)),
-
-                    _buildSectionTitle(context, "What Students Say"),
-
-                    SizedBox(height: Responsive.spacing(context, 0.02)),
-
-                    // _buildFeedbackSection(provider, width, height),
-                    Consumer<FeedbackProvider>(
-  builder: (context, provider, child) {
-
-    if (provider.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (provider.allFeedback.isEmpty) {
-      return const Text(
-        "No Feedback Found",
-        style: TextStyle(color: Colors.white),
-      );
-    }
-
-    final count = provider.allFeedback.length.clamp(0, 5);
-
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: count,
-
-      itemBuilder: (context, index) {
-        final item = provider.allFeedback[index];
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white10,
-            borderRadius: BorderRadius.circular(15),
-          ),
-
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-
-              Text(
-                item["studentId"]?["name"] ?? "Student",
-                style: const TextStyle(color: Colors.white,
-                fontWeight: FontWeight.bold),
-              ),
-
-              const SizedBox(height: 8),
-
-              Text(
-                item["message"] ?? "",
-                style: const TextStyle(color: Colors.white70),
-              ),
-
-              const SizedBox(height: 8),
-
-              Row(
-                children: List.generate(5, (i) {
-                  return Icon(
-                    i < (item["rating"] ?? 0)
-                        ? Icons.star
-                        : Icons.star_border,
-                    color: Colors.amber,
-                    size: 16,
-                  );
-                }),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  },
-),
-
-                    SizedBox(height: Responsive.spacing(context, 0.04)),
-                  ],
+                        );
+                      },
+                    );
+                  },
                 ),
-              ),
+
+                SizedBox(height: Responsive.spacing(context, 0.04)),
+              ],
             ),
-              ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -339,20 +337,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   BoxDecoration get _categoryCardDecoration => BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1E1B4B), Color(0xFF312E81)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      );
+    borderRadius: BorderRadius.circular(28),
+    gradient: const LinearGradient(
+      colors: [Color(0xFF1E1B4B), Color(0xFF312E81)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.25),
+        blurRadius: 15,
+        offset: const Offset(0, 8),
+      ),
+    ],
+  );
 
   /// Full-width list card (phone).
   Widget _buildCategoryCardList(BuildContext context, CategoryModel category) {
@@ -434,7 +432,9 @@ class _HomeScreenState extends State<HomeScreen> {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: Colors.white,
-            fontSize: compact ? 14 : Responsive.fontSize(context, 0.05, min: 14, max: 20),
+            fontSize: compact
+                ? 14
+                : Responsive.fontSize(context, 0.05, min: 14, max: 20),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -471,7 +471,9 @@ class _HomeScreenState extends State<HomeScreen> {
               foregroundColor: Colors.white,
               elevation: 0,
               padding: EdgeInsets.symmetric(
-                vertical: compact ? 8 : Responsive.spacing(context, 0.016, min: 10, max: 16),
+                vertical: compact
+                    ? 8
+                    : Responsive.spacing(context, 0.016, min: 10, max: 16),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(compact ? 12 : 18),
@@ -486,7 +488,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   'View Courses',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: compact ? 12 : Responsive.fontSize(context, 0.035, min: 12, max: 16),
+                    fontSize: compact
+                        ? 12
+                        : Responsive.fontSize(context, 0.035, min: 12, max: 16),
                   ),
                 ),
                 SizedBox(width: compact ? 4 : 8),
@@ -506,10 +510,7 @@ class _HomeScreenState extends State<HomeScreen> {
         MaterialPageRoute(
           builder: (_) => ChangeNotifierProvider(
             create: (_) => SessionProvider(),
-            child: SessionScreen(
-              categoryId: category.id,
-              token: widget.token,
-            ),
+            child: SessionScreen(categoryId: category.id, token: widget.token),
           ),
         ),
       );
@@ -549,7 +550,7 @@ class _HomeScreenState extends State<HomeScreen> {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: provider.categories.length,
-        separatorBuilder: (_, __) =>
+        separatorBuilder: (_, _) =>
             SizedBox(height: Responsive.spacing(context, 0.025)),
         itemBuilder: (context, index) =>
             _buildCategoryCard(context, provider.categories[index]),
@@ -578,96 +579,93 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// FEEDBACK SECTION
   Widget _buildFeedbackSection(double width, double height) {
-  return Consumer<FeedbackProvider>(
-    builder: (context, provider, child) {
+    return Consumer<FeedbackProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      if (provider.isLoading) {
-        return const Center(child: CircularProgressIndicator());
-      }
-
-      if (provider.allFeedback.isEmpty) {
-        return const Text(
-          "No Feedbacks Found",
-          style: TextStyle(color: Colors.white),
-        );
-      }
-
-      return ListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-
-        itemCount: provider.allFeedback.length,
-
-        itemBuilder: (context, index) {
-          final item = provider.allFeedback[index];
-
-          return Container(
-            margin: EdgeInsets.only(bottom: height * 0.02),
-
-            padding: EdgeInsets.all(width * 0.045),
-
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-            ),
-
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-
-                Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: const Color(0xFF312E81),
-                      child: Text(
-                        item["name"] != null
-                            ? item["name"][0].toUpperCase()
-                            : "S",
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-
-                    SizedBox(width: width * 0.03),
-
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item["name"] ?? "Student",
-                            style: TextStyle(
-                              fontSize: width * 0.042,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                          Text(
-                            item["course"] ?? "",
-                            style: TextStyle(color: Colors.grey.shade700),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: height * 0.02),
-
-                Text(
-                  item["message"] ?? "",
-                  style: TextStyle(
-                    fontSize: width * 0.037,
-                    color: Colors.black87,
-                    height: 1.6,
-                  ),
-                ),
-              ],
-            ),
+        if (provider.allFeedback.isEmpty) {
+          return const Text(
+            "No Feedbacks Found",
+            style: TextStyle(color: Colors.white),
           );
-        },
-      );
-    },
-  );
-}
-  }
+        }
 
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+
+          itemCount: provider.allFeedback.length,
+
+          itemBuilder: (context, index) {
+            final item = provider.allFeedback[index];
+
+            return Container(
+              margin: EdgeInsets.only(bottom: height * 0.02),
+
+              padding: EdgeInsets.all(width * 0.045),
+
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+              ),
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: const Color(0xFF312E81),
+                        child: Text(
+                          item["name"] != null
+                              ? item["name"][0].toUpperCase()
+                              : "S",
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+
+                      SizedBox(width: width * 0.03),
+
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item["name"] ?? "Student",
+                              style: TextStyle(
+                                fontSize: width * 0.042,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            Text(
+                              item["course"] ?? "",
+                              style: TextStyle(color: Colors.grey.shade700),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: height * 0.02),
+
+                  Text(
+                    item["message"] ?? "",
+                    style: TextStyle(
+                      fontSize: width * 0.037,
+                      color: Colors.black87,
+                      height: 1.6,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}

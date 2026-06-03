@@ -57,7 +57,7 @@ getAllUsersFeedback(String token) async {
 
   } catch(e) {
 
-    print("ALL FEEDBACK ERROR: $e");
+    // print("ALL FEEDBACK ERROR: $e");
 
     throw Exception(
       "Connection problem / Render server sleeping",
@@ -98,7 +98,7 @@ getMyFeedback(String token) async {
 
   } catch(e) {
 
-    print("MY FEEDBACK ERROR: $e");
+    // print("MY FEEDBACK ERROR: $e");
 
     throw Exception("Network Error");
   }
@@ -156,7 +156,7 @@ required int rating,
 
   } catch(e) {
 
-    print("SEND FEEDBACK ERROR: $e");
+    // print("SEND FEEDBACK ERROR: $e");
 
     throw Exception("Send Feedback Failed");
   }
@@ -174,8 +174,8 @@ static Future<bool> updateFeedback({
 
   final url = "https://zindalearnbackend.onrender.com/api/feedback";
 
-  print("UPDATE URL: $url");
-  print("EDIT ID: $id");
+  // print("UPDATE URL: $url");
+  // print("EDIT ID: $id");
 
   final res = await http.put(
     Uri.parse(url),
@@ -192,8 +192,8 @@ static Future<bool> updateFeedback({
     }),
   );
 
-  print("STATUS: ${res.statusCode}");
-  print("BODY: ${res.body}");
+  // print("STATUS: ${res.statusCode}");
+  // print("BODY: ${res.body}");
 
   return res.statusCode == 200;
 }
@@ -215,8 +215,8 @@ static Future<bool> updateFeedback({
       },
     );
 
-    print("DELETE STATUS: ${response.statusCode}");
-    print("DELETE BODY: ${response.body}");
+    // print("DELETE STATUS: ${response.statusCode}");
+    // print("DELETE BODY: ${response.body}");
 
     if (response.statusCode == 200 ||
         response.statusCode == 201) {
@@ -228,7 +228,7 @@ static Future<bool> updateFeedback({
 
   } catch (e) {
 
-    print("DELETE ERROR: $e");
+    // print("DELETE ERROR: $e");
 
     return false;
   }
