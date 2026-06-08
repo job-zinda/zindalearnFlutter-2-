@@ -33,16 +33,28 @@ class FeedbackProvider with ChangeNotifier {
           await FeedbackService.getAllUsersFeedback(
               token);
 
+      // if (res["feedbacks"] != null) {
+
+      //   _allFeedback =
+      //       List<Map<String, dynamic>>.from(
+      //           res["feedbacks"]);
+
+      // } else {
+
+      //   _allFeedback = [];
+      // }
+
       if (res["feedbacks"] != null) {
 
-        _allFeedback =
-            List<Map<String, dynamic>>.from(
-                res["feedbacks"]);
+  _allFeedback =
+      List<Map<String, dynamic>>.from(
+        res["feedbacks"],
+      ).take(5).toList();
 
-      } else {
+} else {
 
-        _allFeedback = [];
-      }
+  _allFeedback = [];
+}
 
     } catch (e) {
 
@@ -121,7 +133,7 @@ Future<bool> sendFeedback({
 
   } catch (e) {
 
-    print("SEND FEEDBACK ERROR: $e");
+    // print("SEND FEEDBACK ERROR: $e");
 
     return false;
   }
@@ -169,7 +181,7 @@ Future<void> deleteFeedback({
 
   } catch (e) {
 
-    print("DELETE ERROR: $e");
+    // print("DELETE ERROR: $e");
   }
 }
 }

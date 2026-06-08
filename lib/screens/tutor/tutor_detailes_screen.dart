@@ -43,10 +43,10 @@ class _TutorDetailsScreenState extends State<TutorDetailsScreen> {
     Future.microtask(() async {
       await context.read<AuthProvider>().loadUser();
 
-      print(
-        "AUTH USER ID = "
-        "${context.read<AuthProvider>().userId}",
-      );
+      // print(
+      //   "AUTH USER ID = "
+      //   "${context.read<AuthProvider>().userId}",
+      // );
 
       fetchTutorDetails();
     });
@@ -56,17 +56,18 @@ class _TutorDetailsScreenState extends State<TutorDetailsScreen> {
     try {
       final data = await _service.getTutorDetails(widget.tutorId, widget.token);
 
-      print(
-        "CURRENT AUTH USER ID = "
-        "${context.read<AuthProvider>().userId}",
-      );
+      // print(
+      //   "CURRENT AUTH USER ID = "
+      //   "${context.read<AuthProvider>().userId
+      //   }",
+      // );
 
       setState(() {
         tutor = data;
-        print("LOGIN USER ID = ${data["loginUserId"]}");
+        // print("LOGIN USER ID = ${data["loginUserId"]}");
 
-        print("TUTOR DATA: $data");
-        print("RATING FROM API: ${data["rating"]}");
+        // print("TUTOR DATA: $data");
+        // print("RATING FROM API: ${data["rating"]}");
       });
     } catch (e) {
       debugPrint("Tutor Details Error: $e");

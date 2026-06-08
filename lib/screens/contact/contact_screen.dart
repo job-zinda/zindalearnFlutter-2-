@@ -19,6 +19,10 @@ class ContactScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Contact Us"),
+        backgroundColor: const Color.fromARGB(255, 13, 2, 64),
+      ),
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(

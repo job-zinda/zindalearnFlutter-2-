@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ChatService {
-  String baseUrl = "https://zindalearnbackend.onrender.com/api";
+  String baseUrl = "https://api.zindalearn.com/api";
 
   /// CONNECT REQUEST
   Future connectRequest(String tutorId, String token) async {

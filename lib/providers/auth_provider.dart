@@ -52,7 +52,7 @@ Future<(bool, dynamic)> login({
       password: password,
     );
 
-    print("FULL RESPONSE = $res");
+    // print("FULL RESPONSE = $res");
 
    if (res["token"] != null) {
 
@@ -66,10 +66,10 @@ Future<(bool, dynamic)> login({
 
 
 
-  print("student = ${res["student"]}");
-  print("user = ${res["user"]}");
-  print("data = ${res["data"]}");
-  print("root = ${res["_id"]}");
+  // print("student = ${res["student"]}");
+  // print("user = ${res["user"]}");
+  // print("data = ${res["data"]}");
+  // print("root = ${res["_id"]}");
 
   _userId =
       res["student"]?["_id"]?.toString() ??
@@ -78,7 +78,7 @@ Future<(bool, dynamic)> login({
       res["_id"]?.toString() ??
       "";
 
-  print("EXTRACTED USER ID = $_userId");
+  // print("EXTRACTED USER ID = $_userId");
 
   if (_userId != null &&
       _userId!.trim().isNotEmpty) {
@@ -102,7 +102,7 @@ Future<(bool, dynamic)> login({
 
   } catch(e){
 
-    print("LOGIN ERROR = $e");
+    // print("LOGIN ERROR = $e");
 
     return (
       false,
@@ -149,7 +149,7 @@ Future<void> loadUser() async {
         cpassword: cpassword,
       );
 
-      print(res);
+      // print(res);
 
       if (res["msg"] == "Registration successful") {
         return (true, res["msg"]);

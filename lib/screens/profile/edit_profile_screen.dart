@@ -104,6 +104,84 @@ class _EditProfileScreenState
             _buildCard(
               child: Column(
                 children: [
+                  Consumer<ProfileProvider>(
+  builder: (context, provider, child) {
+    return Column(
+      children: [
+
+        const SizedBox(height: 15),
+
+       Stack(
+  clipBehavior: Clip.none,
+  children: [
+
+    GestureDetector(
+      onTap: () async {
+        await provider.pickImageFromCamera();
+      },
+
+      child: CircleAvatar(
+        radius: 60,
+        backgroundColor: Colors.white24,
+
+        backgroundImage: provider.image != null
+            ? FileImage(provider.image!)
+            : null,
+
+        child: provider.image == null
+            ? const Icon(
+                Icons.person,
+                size: 60,
+                color: Colors.white,
+              )
+            : null,
+      ),
+    ),
+
+    Positioned(
+      bottom: 0,
+      right: 0,
+      child: GestureDetector(
+        onTap: () async {
+          await provider.pickImageFromCamera();
+        },
+
+        child: Container(
+          padding: const EdgeInsets.all(8),
+
+          decoration: const BoxDecoration(
+            color: Colors.deepPurple,
+            shape: BoxShape.circle,
+          ),
+
+          child: const Icon(
+            Icons.camera_alt,
+            color: Colors.white,
+            size: 18,
+          ),
+        ),
+      ),
+    ),
+  ],
+),
+
+        const SizedBox(height: 15),
+
+        TextButton.icon(
+          onPressed: () async {
+            await provider.pickImageFromGallery();
+          },
+          icon: const Icon(Icons.photo_library),
+          label: const Text("Choose from Gallery"),
+        ),
+
+        const Divider(
+          color: Colors.white10,
+        ),
+      ],
+    );
+  },
+),
 
                   _tileField(
                     icon: Icons.person,

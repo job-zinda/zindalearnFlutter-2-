@@ -26,7 +26,7 @@ class SessionProvider with ChangeNotifier {
           .map<SessionModel>((e) => SessionModel.fromJson(e))
           .toList();
     } catch (e) {
-      debugPrint(e.toString());
+      // debugPrint(e.toString());
     } finally {
       _isLoading = false;
 

@@ -1,67 +1,236 @@
 import 'package:flutter/material.dart';
-import 'package:zindaonlineschool/widgets/legal_screenTemplate.dart';
+import 'package:zindaonlineschool/core/utils/responsive.dart';
+import 'package:zindaonlineschool/widgets/responsive_body.dart';
+
+class FAQItem {
+  final String question;
+  final String answer;
+
+  const FAQItem({
+    required this.question,
+    required this.answer,
+  });
+}
 
 class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final width = Responsive.contentWidth(context);
 
-  return const LegalScreenTemplate(
-  title: "Help & Support",
+    const String introduction = """
+Zinda Online School is a learning platform designed to help students study easily from home by connecting them with tutors, online classes, learning support, and educational resources.
 
-  body: [
+Getting Started Guide
 
-    // =====================
-    // INTRO SECTION (PARAGRAPH STYLE)
-    // =====================
+Before using Zinda Online School, take time to explore the app. You can browse courses, tutors, sessions, profile, chat support, feedback, and settings.
 
-    "Zinda Online School is a learning platform designed to help students study easily from home by connecting them with tutors, online classes, learning support, and educational resources. Our mission is to make learning simple, accessible, reliable, and helpful for every student.",
+Choosing the Right Course or Tutor
 
-    // =====================
-    // QUICK GUIDE HEADER
-    // =====================
+Select courses based on your academic level. Zinda Online School offers Online Tuition, Skill Courses, and Talent Courses based on student needs.
 
-    "Getting Started Guide",
+Attend Classes Regularly
 
-    "Before using Zinda Online School, take time to explore the app. You can browse courses, tutors, sessions, profile, chat support, feedback, and settings.",
+Regular attendance is important. Join sessions on time and follow tutor instructions for better learning results.
 
-    "Choosing the Right Course or Tutor",
+Use Chat & Support
 
-    "Select courses based on your academic level. Zinda Online School offers Online Tuition, Skill Courses, and Talent Courses based on student needs.",
+If you face any issue with courses, tutors, payments, or technical problems, use the in-app support system to contact the Zinda Online School team.
 
-    "Attend Classes Regularly",
+Keep Your Profile Updated
 
-    "Regular attendance is important. Join sessions on time and follow tutor instructions for better learning results.",
+Make sure your name, email, phone number, and profile details are always correct for better communication and support.
 
-    "Use Chat & Support",
+We hope Zinda Online School helps you achieve your learning goals. Keep growing and learning!
+""";
 
-    "If you face any issue with courses, tutors, payments, or technical problems, use the in-app support system to contact the Zinda Online School team.",
+    const List<FAQItem> faqs = [
+      FAQItem(
+        question: "What is Zinda Online School?",
+        answer:
+            "It is a mobile learning platform where students can learn from home using online tutors and classes.",
+      ),
+      FAQItem(
+        question: "What services are available?",
+        answer:
+            "Online tuition, tutor connection, classes, chat support, feedback system, and learning assistance.",
+      ),
+      FAQItem(
+        question: "Is it free?",
+        answer:
+            "Some services are free, but premium courses or tutors may require payment.",
+      ),
+      FAQItem(
+        question: "How do I choose a tutor?",
+        answer:
+            "Browse tutor profiles, check ratings, and send a request to connect.",
+      ),
+      FAQItem(
+        question: "How do I get help?",
+        answer:
+            "Use the in-app support or chat system to contact the Zinda Online School team.",
+      ),
+      FAQItem(
+        question: "Why use Zinda Online School?",
+        answer:
+            "Because it provides flexible, home-based learning with expert tutors and structured guidance.",
+      ),
+    ];
 
-    "Keep Your Profile Updated",
+    return Scaffold(
+      backgroundColor: const Color(0xFF0B023D),
 
-    "Make sure your name, email, phone number, and profile details are always correct for better communication and support.",
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0B023D),
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          "Help & Support",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: Responsive.fontSize(
+              context,
+              0.05,
+              min: 18,
+              max: 24,
+            ),
+          ),
+        ),
+      ),
 
-    // =====================
-    // FAQ SECTION HEADER
-    // =====================
+      body: ResponsiveBody(
+        child: SingleChildScrollView(
+          padding: Responsive.screenPadding(context),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
 
-    "Frequently Asked Questions",
+              /// INTRODUCTION TITLE
+              Text(
+                "Zinda Online School",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: Responsive.fontSize(
+                    context,
+                    0.045,
+                    min: 18,
+                    max: 24,
+                  ),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
 
-    "Q1. What is Zinda Online School?\n\nIt is a mobile learning platform where students can learn from home using online tutors and classes.",
+              const SizedBox(height: 16),
 
-    "Q2. What services are available?\n\nOnline tuition, tutor connection, classes, chat support, feedback system, and learning assistance.",
+              /// INTRODUCTION CARD
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(width * 0.045),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  introduction,
+                  style: TextStyle(
+                    color: Colors.white,
+                    height: 1.8,
+                    fontSize: Responsive.fontSize(
+                      context,
+                      0.034,
+                      min: 13,
+                      max: 17,
+                    ),
+                  ),
+                ),
+              ),
 
-    "Q3. Is it free?\n\nSome services are free, but premium courses or tutors may require payment.",
+              const SizedBox(height: 28),
 
-    "Q4. How do I choose a tutor?\n\nBrowse tutor profiles, check ratings, and send a request to connect.",
+              /// FAQ TITLE
+              Text(
+                "Frequently Asked Questions",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: Responsive.fontSize(
+                    context,
+                    0.045,
+                    min: 18,
+                    max: 24,
+                  ),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
 
-    "Q5. How do I get help?\n\nUse the in-app support or chat system to contact the Zinda Online School team.",
+              const SizedBox(height: 12),
 
-    "Q6. Why use Zinda Online School?\n\nBecause it provides flexible, home-based learning with expert tutors and structured guidance.",
-
-    "We hope Zinda Online School helps you achieve your learning goals. Keep growing and learning!"
-  ],
-);
+              /// FAQ LIST
+              ...faqs.map(
+                (faq) => Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      dividerColor: Colors.transparent,
+                    ),
+                    child: ExpansionTile(
+                      iconColor: Colors.white,
+                      collapsedIconColor: Colors.white,
+                      title: Text(
+                        faq.question,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: Responsive.fontSize(
+                            context,
+                            0.035,
+                            min: 14,
+                            max: 18,
+                          ),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            16,
+                            0,
+                            16,
+                            16,
+                          ),
+                          child: Text(
+                            faq.answer,
+                            style: TextStyle(
+                              color: Colors.white70,
+                              height: 1.7,
+                              fontSize: Responsive.fontSize(
+                                context,
+                                0.032,
+                                min: 13,
+                                max: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

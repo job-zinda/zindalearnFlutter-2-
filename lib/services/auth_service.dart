@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuthApiService {
-  static const String baseUrl = "https://zindalearnbackend.onrender.com/api";
+  static const String baseUrl = "https://api.zindalearn.com/api";
 
   static Future<Map<String, dynamic>> login({
     required String email,

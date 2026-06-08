@@ -39,7 +39,7 @@ class ChatProvider with ChangeNotifier {
 
       return res;
     } catch (e) {
-      debugPrint("Connect error: $e");
+      // debugPrint("Connect error: $e");
       return null;
     } finally {
       _isLoading = false;
@@ -54,7 +54,7 @@ class ChatProvider with ChangeNotifier {
       _rooms = res;
       notifyListeners();
     } catch (e) {
-      debugPrint("Room error: $e");
+      // debugPrint("Room error: $e");
     }
   }
 
@@ -65,7 +65,7 @@ class ChatProvider with ChangeNotifier {
       _messages = res;
       notifyListeners();
     } catch (e) {
-      debugPrint("Message error: $e");
+      // debugPrint("Message error: $e");
     }
   }
 
@@ -81,7 +81,7 @@ class ChatProvider with ChangeNotifier {
       _messages = List.from(updated); //
       notifyListeners();
     } catch (e) {
-      debugPrint("Send error: $e");
+      // debugPrint("Send error: $e");
     }
   }
 
@@ -100,7 +100,7 @@ class ChatProvider with ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      debugPrint("Edit error: $e");
+      // debugPrint("Edit error: $e");
     }
   }
 
@@ -119,7 +119,7 @@ class ChatProvider with ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      debugPrint("Delete error: $e");
+      // debugPrint("Delete error: $e");
     }
   }
 
@@ -128,13 +128,16 @@ class ChatProvider with ChangeNotifier {
     try {
       await _service.markAsRead(roomId, token);
     } catch (e) {
-      debugPrint("Read error: $e");
+      // debugPrint("Read error: $e");
     }
   }
 
   Future<void> sendImageMessage(String roomId, File image, String token) async {
     try {
-      final uri = Uri.parse("https://zindalearnbackend.onrender.com/chat/send-image");
+      // final uri = Uri.parse("https://zindalearnbackend.onrender.com/chat/send-image");
+      final uri = Uri.parse(
+  "https://api.zindalearn.com/api/chat/send-image"
+);
 
       var request = http.MultipartRequest("POST", uri);
 
@@ -150,7 +153,7 @@ class ChatProvider with ChangeNotifier {
         await fetchMessages(roomId, token);
       }
     } catch (e) {
-      debugPrint("Image send error: $e");
+      // debugPrint("Image send error: $e");
     }
   }
   Future<void> sendVoiceMessage(
@@ -159,7 +162,10 @@ class ChatProvider with ChangeNotifier {
   String token,
 ) async {
   try {
-    final uri = Uri.parse("https://zindalearnbackend.onrender.com/api/chat/send-voice");
+    // final uri = Uri.parse("https://zindalearnbackend.onrender.com/api/chat/send-voice");
+    final uri = Uri.parse(
+  "https://api.zindalearn.com/api/chat/send-voice"
+);
 
     var request = http.MultipartRequest("POST", uri);
 
@@ -181,7 +187,7 @@ class ChatProvider with ChangeNotifier {
       await fetchMessages(roomId, token);
     }
   } catch (e) {
-    debugPrint("Voice error: $e");
+    // debugPrint("Voice error: $e");
   }
 }
 }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/profile_provider.dart';
@@ -62,10 +64,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       /// PROFILE HEADER (LIKE SETTINGS CARD STYLE)
                       _glassCard(
                         child: ListTile(
-                          leading: const CircleAvatar(
-                            backgroundColor: Colors.white24,
-                            child: Icon(Icons.person, color: Colors.white),
-                          ),
+                          // leading: const CircleAvatar(
+                          //   backgroundColor: Colors.white24,
+                          //   child: Icon(Icons.person, color: Colors.white),
+                          // ),
+                          leading: CircleAvatar(
+  radius: 28,
+  backgroundColor: Colors.white24,
+
+  backgroundImage:
+      profile["photo"] != null &&
+              profile["photo"].toString().isNotEmpty
+          ? MemoryImage(
+              base64Decode(profile["photo"]),
+            )
+          : null,
+
+  child: profile["photo"] == null ||
+          profile["photo"].toString().isEmpty
+      ? const Icon(
+          Icons.person,
+          color: Colors.white,
+        )
+      : null,
+),
                           title: Text(
                             profile["name"] ?? "",
                             style: const TextStyle(color: Colors.white),
@@ -148,7 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  /// 🔵 SAME SETTINGS STYLE CARD
+  
   Widget _glassCard({required Widget child}) {
     return Container(
       decoration: BoxDecoration(

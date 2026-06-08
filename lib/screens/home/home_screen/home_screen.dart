@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:zindaonlineschool/widgets/custom_searchbar.dart';
 import 'package:zindaonlineschool/providers/course_provider.dart';
 import 'package:zindaonlineschool/providers/feedback_provider.dart';
 import 'package:zindaonlineschool/providers/home_provider.dart';
@@ -22,6 +24,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
+  // String searchQuery = "";
+
   @override
   void initState() {
     super.initState();
@@ -76,6 +81,16 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _buildWelcomeSection(context),
 
+                // SizedBox(height: Responsive.spacing(context, 0.025)),
+                // CustomSearchBar(
+                //   hintText: "Search categories...",
+                //   onChanged: (value) {
+                //     setState(() {
+                //       searchQuery = value; // Triggers UI build with filtered list
+                //     });
+                //   },
+                // ),
+
                 if (provider.errorMessage != null) ...[
                   SizedBox(height: Responsive.spacing(context, 0.02)),
                   _buildErrorBanner(provider.errorMessage!),
@@ -119,75 +134,303 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(height: Responsive.spacing(context, 0.02)),
 
                 // _buildFeedbackSection(provider, width, height),
-                Consumer<FeedbackProvider>(
-                  builder: (context, provider, child) {
-                    if (provider.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+//                 Consumer<FeedbackProvider>(
+//                   builder: (context, provider, child) {
+//                     if (provider.isLoading) {
+//                       return const Center(child: CircularProgressIndicator());
+//                     }
 
-                    if (provider.allFeedback.isEmpty) {
-                      return const Text(
-                        "No Feedback Found",
-                        style: TextStyle(color: Colors.white),
-                      );
-                    }
+//                     if (provider.allFeedback.isEmpty) {
+//                       return const Text(
+//                         "No Feedback Found",
+//                         style: TextStyle(color: Colors.white),
+//                       );
+//                     }
 
-                    final count = provider.allFeedback.length.clamp(0, 5);
+//                     final count = provider.allFeedback.length.clamp(0, 5);
 
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: count,
+//                     return ListView.builder(
+//                       shrinkWrap: true,
+//                       physics: const NeverScrollableScrollPhysics(),
+//                       itemCount: count,
 
-                      itemBuilder: (context, index) {
-                        final item = provider.allFeedback[index];
+//                       itemBuilder: (context, index) {
+//                         final item = provider.allFeedback[index];
+//                       //  debugPrint(item.toString());
+//                       final String? photoStr = item["studentId"]?["photo"];
+//         final bool hasPhoto = photoStr != null && photoStr.isNotEmpty;
+//                         return Container(
+//                           margin: const EdgeInsets.only(bottom: 12),
+//                           padding: const EdgeInsets.all(16),
+//                           decoration: BoxDecoration(
+//                             color: Colors.white10,
+//                             borderRadius: BorderRadius.circular(15),
+//                           ),
 
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white10,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
+//                           child: Column(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
+//                             children: [
+//                               // Text(
+//                               //   item["studentId"]?["name"] ?? "Student",
+//                               //   style: const TextStyle(
+//                               //     color: Colors.white,
+//                               //     fontWeight: FontWeight.bold,
+//                               //   ),
+//                               // ),
+//                               Row(
+//   children: [
 
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item["studentId"]?["name"] ?? "Student",
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+//   CircleAvatar(
+//   radius: 22,
 
-                              const SizedBox(height: 8),
+//   backgroundImage: (() {
+//     try {
+//       final photo =
+//           item["studentId"]?["photo"];
 
-                              Text(
-                                item["message"] ?? "",
-                                style: const TextStyle(color: Colors.white70),
-                              ),
+//       if (photo == null ||
+//           photo.toString().isEmpty) {
+//         return null;
+//       }
 
-                              const SizedBox(height: 8),
+//       return MemoryImage(
+//         base64Decode(photo),
+//       );
+//     } catch (_) {
+//       return null;
+//     }
+//   })(),
 
-                              Row(
-                                children: List.generate(5, (i) {
-                                  return Icon(
-                                    i < (item["rating"] ?? 0)
-                                        ? Icons.star
-                                        : Icons.star_border,
-                                    color: Colors.amber,
-                                    size: 16,
-                                  );
-                                }),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
+//   child: const Icon(
+//     Icons.person,
+//     color: Colors.white,
+//   ),
+// ),
+
+//     const SizedBox(width: 10),
+
+//     Expanded(
+//       child: Text(
+//         item["studentId"]?["name"] ??
+//             "Student",
+//         style: const TextStyle(
+//           color: Colors.white,
+//           fontWeight: FontWeight.bold,
+//           fontSize: 15,
+//         ),
+//       ),
+//     ),
+//   ],
+// ),
+
+//                               const SizedBox(height: 8),
+
+//                               Text(
+//                                 item["message"] ?? "",
+//                                 style: const TextStyle(color: Colors.white70),
+//                               ),
+
+//                               const SizedBox(height: 8),
+
+//                               Row(
+//                                 children: List.generate(5, (i) {
+//                                   return Icon(
+//                                     i < (item["rating"] ?? 0)
+//                                         ? Icons.star
+//                                         : Icons.star_border,
+//                                     color: Colors.amber,
+//                                     size: 16,
+//                                   );
+//                                 }),
+//                               ),
+//                             ],
+//                           ),
+//                         );
+//                       },
+//                     );
+//                   },
+//                 ),
+Consumer<FeedbackProvider>(
+  builder: (context, provider, child) {
+    if (provider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (provider.allFeedback.isEmpty) {
+      return const Text(
+        "No Feedback Found",
+        style: TextStyle(color: Colors.white),
+      );
+    }
+
+    final count = provider.allFeedback.length.clamp(0, 5);
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: count,
+      // itemBuilder: (context, index) {
+      //   final item = provider.allFeedback[index];
+        
+      //   // Extract the photo string safely
+      //   final String? photoStr = item["studentId"]?["photo"];
+      //  final String nameStr = item["name"] ?? item["studentId"]?["name"] ?? "Student";
+      //   final bool hasPhoto = photoStr != null && photoStr.isNotEmpty;
+
+      //   return Container(
+      //     margin: const EdgeInsets.only(bottom: 12),
+      //     padding: const EdgeInsets.all(16),
+      //     decoration: BoxDecoration(
+      //       color: Colors.white10,
+      //       borderRadius: BorderRadius.circular(15),
+      //     ),
+      //     child: Column(
+      //       crossAxisAlignment: CrossAxisAlignment.start,
+      //       children: [
+      //         Row(
+      //           children: [
+      //             CircleAvatar(
+      //               radius: 22,
+      //               backgroundColor: Colors.white24, // Subtle fallback background color
+      //               backgroundImage: (() {
+      //                 if (!hasPhoto) return null;
+      //                 try {
+      //                   return MemoryImage(
+      //                     base64Decode(photoStr),
+      //                   );
+      //                 } catch (_) {
+      //                   return null; // Return null if base64 decoding fails
+      //                 }
+      //               })(),
+      //               // FIX: If user has a valid photo, child is null (invisible icon). 
+      //               // If no photo, it shows the person icon!
+      //               child: !hasPhoto 
+      //                   ? const Icon(
+      //                       Icons.person,
+      //                       color: Colors.white,
+      //                     )
+      //                   : null,
+      //             ),
+      //             const SizedBox(width: 10),
+      //             Expanded(
+      //               child: Text(
+      //                 nameStr,
+      //                 style: const TextStyle(
+      //                   color: Colors.white,
+      //                   fontWeight: FontWeight.bold,
+      //                   fontSize: 15,
+      //                 ),
+      //               ),
+      //             ),
+      //           ],
+      //         ),
+      //         const SizedBox(height: 8),
+      //         Text(
+      //           item["message"] ?? "",
+      //           style: const TextStyle(color: Colors.white70),
+      //         ),
+      //         const SizedBox(height: 8),
+      //         Row(
+      //           children: List.generate(5, (i) {
+      //             return Icon(
+      //               i < (item["rating"] ?? 0)
+      //                   ? Icons.star
+      //                   : Icons.star_border,
+      //               color: Colors.amber,
+      //               size: 16,
+      //             );
+      //           }),
+      //         ),
+      //       ],
+      //     ),
+      //   );
+      // },
+      itemBuilder: (context, index) {
+  final item = provider.allFeedback[index];
+  
+  // 1. Safely extract the data
+  final String nameStr = item["name"] ?? item["studentId"]?["name"] ?? "Student";
+  String? photoStr = item["studentId"]?["photo"];
+
+  MemoryImage? avatarImage;
+
+  // 2. Clean the string and try decoding
+  if (photoStr != null && photoStr.trim().isNotEmpty) {
+    try {
+      // Remove data URI prefix if it exists (e.g., "data:image/png;base64,")
+      if (photoStr.contains(',')) {
+        photoStr = photoStr.split(',').last;
+      }
+      
+      // Clean up any stray whitespaces or newlines
+      photoStr = photoStr.replaceAll(RegExp(r'\s+'), '');
+
+      avatarImage = MemoryImage(base64Decode(photoStr));
+    } catch (e) {
+      debugPrint("Decoding failed for $nameStr: $e");
+      avatarImage = null; // Quietly drop down to fallback icon on failure
+    }
+  }
+
+  return Container(
+    margin: const EdgeInsets.only(bottom: 12),
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white10,
+      borderRadius: BorderRadius.circular(15),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            // 3. Keep the CircleAvatar extremely simple and reactive
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: Colors.white24,
+              backgroundImage: avatarImage,
+              child: avatarImage == null
+                  ? const Icon(
+                      Icons.person,
+                      color: Colors.white,
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                nameStr,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
                 ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          item["message"] ?? "",
+          style: const TextStyle(color: Colors.white70),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: List.generate(5, (i) {
+            return Icon(
+              i < (item["rating"] ?? 0) ? Icons.star : Icons.star_border,
+              color: Colors.amber,
+              size: 16,
+            );
+          }),
+        ),
+      ],
+    ),
+  );
+}
+    );
+  },
+),
 
                 SizedBox(height: Responsive.spacing(context, 0.04)),
               ],

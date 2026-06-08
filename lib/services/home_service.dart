@@ -289,12 +289,13 @@
 // }
 
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../core/network/http_client.dart';
 
 class HomeService {
-  static const String baseUrl = 'https://zindalearnbackend.onrender.com/api';
+  static const String baseUrl = 'https://api.zindalearn.com/api';
 
   /// BANNERS
   Future<List<dynamic>> getBanners() async {
@@ -415,6 +416,7 @@ Future<List<dynamic>> getTutorsByCourse(
       "Content-Type": "application/json",
     },
   );
+  print("Backend Raw Data: ${response.body}");
 
   if (response.statusCode == 200) {
 
@@ -479,7 +481,7 @@ Future<bool> submitReview({
 
     final response = await AppHttp.post(
       Uri.parse(
-        "https://zindalearnbackend.onrender.com/api/tuter/$tutorId/review",
+        "https://api.zindalearn.com/api/tuter/$tutorId/review",
       ),
 
       headers: {
@@ -499,7 +501,7 @@ Future<bool> submitReview({
       }),
     );
 
-    debugPrint(response.body);
+     debugPrint(response.body);
 
     return response.statusCode ==
             200 ||
@@ -508,7 +510,7 @@ Future<bool> submitReview({
 
   } catch (e) {
 
-    debugPrint(e.toString());
+     debugPrint(e.toString());
 
     return false;
   }
@@ -523,7 +525,7 @@ Future<bool> updateReview({
 
   final response = await AppHttp.post(
     Uri.parse(
-      "https://zindalearnbackend.onrender.com/api/tuter/$tutorId/review",
+      "https://api.zindalearn.com/api/tuter/$tutorId/review",
     ),
     headers: {
       "Authorization": "Bearer $token",
@@ -544,7 +546,7 @@ Future<bool> deleteReview({
 
   final response = await AppHttp.delete(
     Uri.parse(
-      "https://zindalearnbackend.onrender.com/api/tuter/$tutorId/review",
+      "https://api.zindalearn.com/api/tuter/$tutorId/review",
     ),
     headers: {
       "Authorization": "Bearer $token",

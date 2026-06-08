@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 class ProfileService {
 
   static const String baseUrl =
-      "https://zindalearnbackend.onrender.com/api";
+      "https://api.zindalearn.com/api";
 
   /// ================= GET PROFILE =================
   static Future<Map<String, dynamic>> getProfile({
@@ -53,7 +53,7 @@ class ProfileService {
         body: jsonEncode({
           "name": name,
           "phone": phone,
-          "photo": ?photo,
+          "photo": photo,
         }),
       );
 

@@ -1,7 +1,7 @@
 class ApiConstants {
 
   static const String baseUrl =
-      'https://zindalearnbackend.onrender.com/api/';
+      'https://api.zindalearn.com/api';
 
   static const String login =
       '${baseUrl}login_user';
@@ -17,4 +17,5 @@ class ApiConstants {
 
   static const String resetPassword =
       '${baseUrl}user_reset_password';
-}
+} 
+

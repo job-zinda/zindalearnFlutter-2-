@@ -475,7 +475,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           if (success) {
                             final token = response["token"];
-                            print("LOGIN TOKEN: $token");
+                            // print("LOGIN TOKEN: $token");
 
                             CustomSnackbar.success(
                               context,

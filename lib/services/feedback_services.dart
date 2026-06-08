@@ -1,236 +1,140 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class FeedbackService {
+  static const String baseUrl = "https://api.zindalearn.com/api";
 
-  static const String baseUrl =
-      "https://zindalearnbackend.onrender.com/api";
-
-  /// =========================
+ 
   /// SAFE JSON CHECK
-  /// =========================
-  static dynamic _safeDecode(http.Response res) {
+ 
+  // static dynamic _safeDecode(http.Response res) {
+  //   /// HTML RESPONSE
+  //   if (res.body.startsWith("<")) {
+  //     throw Exception("Server returned HTML instead of JSON");
+  //   }
 
-    print("STATUS CODE: ${res.statusCode}");
-    print("BODY: ${res.body}");
-
-    /// HTML RESPONSE
-    if (res.body.startsWith("<")) {
-      throw Exception(
-        "Server returned HTML instead of JSON",
-      );
-    }
-
-    return jsonDecode(res.body);
-  }
-
-  /// =========================
-  /// GET ALL USERS FEEDBACK
-  /// =========================
-  // static Future<Map<String, dynamic>>
-  //     getAllUsersFeedback(String token) async {
-
-  //   final res = await http.get(
-  //     Uri.parse("$baseUrl/get/feedback/all"),
-  //     headers: {
-  //       "Authorization": "Bearer $token",
-  //     },
-  //   );
-
-  //   return _safeDecode(res);
+  //   return jsonDecode(res.body);
   // }
-static Future<Map<String,dynamic>>
-getAllUsersFeedback(String token) async {
+static dynamic _safeDecode(http.Response res) {
 
-  try {
-
-    final res = await http
-        .get(
-          Uri.parse("$baseUrl/get/feedback/all"),
-          headers: {
-            "Authorization":"Bearer $token",
-          },
-        )
-        .timeout(const Duration(seconds:60));
-
-    return _safeDecode(res);
-
-  } catch(e) {
-
-    // print("ALL FEEDBACK ERROR: $e");
-
-    throw Exception(
-      "Connection problem / Render server sleeping",
-    );
-  }
-}
-  /// =========================
-  /// GET MY FEEDBACK
-  /// =========================
-  // static Future<Map<String, dynamic>>
-  //     getMyFeedback(String token) async {
-
-  //   final res = await http.get(
-  //     Uri.parse("$baseUrl/feedback/my"),
-  //     headers: {
-  //       "Authorization": "Bearer $token",
-  //     },
-  //   );
-
-  //   return _safeDecode(res);
-  // }
-
-  static Future<Map<String,dynamic>>
-getMyFeedback(String token) async {
-
-  try {
-
-    final res = await http
-        .get(
-          Uri.parse("$baseUrl/feedback/my"),
-          headers: {
-            "Authorization":"Bearer $token",
-          },
-        )
-        .timeout(const Duration(seconds:60));
-
-    return _safeDecode(res);
-
-  } catch(e) {
-
-    // print("MY FEEDBACK ERROR: $e");
-
-    throw Exception("Network Error");
-  }
-}
-
-  /// =========================
-  /// SEND FEEDBACK
-  /// =========================
-  // static Future sendFeedback({
-  //   required String token,
-  //   required String message,
-  //   required int rating,
-  // }) async {
-
-  //   final res = await http.post(
-  //     Uri.parse("$baseUrl/feedback"),
-  //     headers: {
-  //       "Authorization": "Bearer $token",
-  //       "Content-Type": "application/json",
-  //     },
-
-  //     body: jsonEncode({
-  //       "message": message,
-  //       "rating": rating,
-  //     }),
-  //   );
-
-  //   return _safeDecode(res);
-  // }
-static Future sendFeedback({
-required String token,
-required String message,
-required int rating,
-}) async {
-
-  try {
-
-    final res = await http
-        .post(
-          Uri.parse("$baseUrl/feedback"),
-
-          headers:{
-            "Authorization":"Bearer $token",
-            "Content-Type":"application/json",
-          },
-
-          body:jsonEncode({
-            "message":message,
-            "rating":rating,
-          }),
-        )
-        .timeout(const Duration(seconds:60));
-
-    return _safeDecode(res);
-
-  } catch(e) {
-
-    // print("SEND FEEDBACK ERROR: $e");
-
-    throw Exception("Send Feedback Failed");
-  }
-}
-  /// =========================
-  /// UPDATE FEEDBACK
-  /// =========================
-  /// UPDATE FEEDBACK
-static Future<bool> updateFeedback({
-  required String token,
-  required String id,
-  required String message,
-  required int rating,
-}) async {
-
-  final url = "https://zindalearnbackend.onrender.com/api/feedback";
-
-  // print("UPDATE URL: $url");
-  // print("EDIT ID: $id");
-
-  final res = await http.put(
-    Uri.parse(url),
-
-    headers: {
-      "Authorization": "Bearer $token",
-      "Content-Type": "application/json",
-    },
-
-    body: jsonEncode({
-      "id": id,          //  IMPORTANT: send id in BODY
-      "message": message,
-      "rating": rating,
-    }),
+  debugPrint(
+    "STATUS CODE: ${res.statusCode}",
   );
 
-  // print("STATUS: ${res.statusCode}");
-  // print("BODY: ${res.body}");
+  if (res.body.startsWith("<")) {
+    throw Exception(
+      "Server returned HTML instead of JSON",
+    );
+  }
 
-  return res.statusCode == 200;
+  return jsonDecode(res.body);
 }
-  /// =========================
-  /// DELETE FEEDBACK
-  /// =========================
- static Future<bool> deleteFeedback({
-  required String token,
-  required String id,
-}) async {
+  static Future<Map<String, dynamic>> getAllUsersFeedback(String token) async {
+    try {
+      final res = await http
+          .get(
+            Uri.parse("$baseUrl/get/feedback/all"),
+            headers: {"Authorization": "Bearer $token"},
+          )
+          .timeout(const Duration(seconds: 60));
 
-  try {
+      return _safeDecode(res);
+    } catch (e) {
 
-    final response = await http.delete(
-      Uri.parse("$baseUrl/feedback/my"),
+
+      throw Exception("Connection problem / Render server sleeping");
+    }
+  }
+
+  static Future<Map<String, dynamic>> getMyFeedback(String token) async {
+    try {
+      final res = await http
+          .get(
+            Uri.parse("$baseUrl/feedback/my"),
+            headers: {"Authorization": "Bearer $token"},
+          )
+          .timeout(const Duration(seconds: 60));
+
+      return _safeDecode(res);
+    } catch (e) {
+      // print("MY FEEDBACK ERROR: $e");
+
+      throw Exception("Network Error");
+    }
+  }
+
+  static Future sendFeedback({
+    required String token,
+    required String message,
+    required int rating,
+  }) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse("$baseUrl/feedback"),
+
+            headers: {
+              "Authorization": "Bearer $token",
+              "Content-Type": "application/json",
+            },
+
+            body: jsonEncode({"message": message, "rating": rating}),
+          )
+          .timeout(const Duration(seconds: 60));
+
+      return _safeDecode(res);
+    } catch (e) {
+      throw Exception("Send Feedback Failed");
+    }
+  }
+
+  static Future<bool> updateFeedback({
+    required String token,
+    required String id,
+    required String message,
+    required int rating,
+  }) async {
+    final url = "https://api.zindalearn.com/api/feedback";
+
+    final res = await http.put(
+      Uri.parse(url),
 
       headers: {
         "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
       },
+
+      body: jsonEncode({
+        "id": id, //  IMPORTANT: send id in BODY
+        "message": message,
+        "rating": rating,
+      }),
     );
 
-    // print("DELETE STATUS: ${response.statusCode}");
-    // print("DELETE BODY: ${response.body}");
-
-    if (response.statusCode == 200 ||
-        response.statusCode == 201) {
-
-      return true;
-    }
-
-    return false;
-
-  } catch (e) {
-
-    // print("DELETE ERROR: $e");
-
-    return false;
+    return res.statusCode == 200;
   }
-}
+
+  static Future<bool> deleteFeedback({
+    required String token,
+    required String id,
+  }) async {
+    try {
+      final response = await http.delete(
+        Uri.parse("$baseUrl/feedback/my"),
+
+        headers: {"Authorization": "Bearer $token"},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+     
+
+      return false;
+    }
+  }
 }
