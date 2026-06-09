@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:zindaonlineschool/widgets/custom_searchbar.dart';
+import 'package:zindaonlineschool/core/constants/app_colors.dart';
+import 'package:zindaonlineschool/core/constants/app_gaps.dart';
+import 'package:zindaonlineschool/core/constants/app_space.dart';
 import 'package:zindaonlineschool/providers/course_provider.dart';
 import 'package:zindaonlineschool/providers/feedback_provider.dart';
 import 'package:zindaonlineschool/providers/home_provider.dart';
+import 'package:zindaonlineschool/providers/profile_provider.dart';
 import 'package:zindaonlineschool/providers/session_provider.dart';
 import 'package:zindaonlineschool/screens/course/course_screen.dart';
 import 'package:zindaonlineschool/screens/session/session_screen.dart';
@@ -24,18 +27,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
-  // String searchQuery = "";
-
   @override
   void initState() {
     super.initState();
-    
 
-    Future.microtask(() async{
-    await    Future.wait([
+    Future.microtask(() async {
+      await Future.wait([
         context.read<HomeProvider>().fetchHomeData(widget.token),
         context.read<FeedbackProvider>().fetchAllUsersFeedback(widget.token),
+        context.read<ProfileProvider>().getProfile(token: widget.token),
       ]);
     });
   }
@@ -45,16 +45,15 @@ class _HomeScreenState extends State<HomeScreen> {
     final provider = context.watch<HomeProvider>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B023D),
+      backgroundColor: AppColors.background,
 
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-
         title: const Text(
           "Zinda Online",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -64,32 +63,19 @@ class _HomeScreenState extends State<HomeScreen> {
             provider.refreshHomeData(widget.token),
             context.read<FeedbackProvider>().fetchAllUsersFeedback(
               widget.token,
-               force: true,
+              force: true,
             ),
           ]);
         },
-
         child: ResponsiveBody(
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
             ),
-
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-
               children: [
                 _buildWelcomeSection(context),
-
-                // SizedBox(height: Responsive.spacing(context, 0.025)),
-                // CustomSearchBar(
-                //   hintText: "Search categories...",
-                //   onChanged: (value) {
-                //     setState(() {
-                //       searchQuery = value; // Triggers UI build with filtered list
-                //     });
-                //   },
-                // ),
 
                 if (provider.errorMessage != null) ...[
                   SizedBox(height: Responsive.spacing(context, 0.02)),
@@ -107,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         children: [
                           CircularProgressIndicator(),
-                          SizedBox(height: 12),
+                          AppSpacing.h10,
                           Text(
                             "Loading courses…",
                             style: TextStyle(color: Colors.white70),
@@ -133,304 +119,126 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 SizedBox(height: Responsive.spacing(context, 0.02)),
 
-                // _buildFeedbackSection(provider, width, height),
-//                 Consumer<FeedbackProvider>(
-//                   builder: (context, provider, child) {
-//                     if (provider.isLoading) {
-//                       return const Center(child: CircularProgressIndicator());
-//                     }
+                Consumer<FeedbackProvider>(
+                  builder: (context, provider, child) {
+                    if (provider.isLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-//                     if (provider.allFeedback.isEmpty) {
-//                       return const Text(
-//                         "No Feedback Found",
-//                         style: TextStyle(color: Colors.white),
-//                       );
-//                     }
+                    if (provider.allFeedback.isEmpty) {
+                      return const Text(
+                        "No Feedback Found",
+                        style: TextStyle(color: AppColors.white),
+                      );
+                    }
 
-//                     final count = provider.allFeedback.length.clamp(0, 5);
+                    final count = provider.allFeedback.length.clamp(0, 5);
 
-//                     return ListView.builder(
-//                       shrinkWrap: true,
-//                       physics: const NeverScrollableScrollPhysics(),
-//                       itemCount: count,
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: count,
+                      itemBuilder: (context, index) {
+                        final item = provider.allFeedback[index];
 
-//                       itemBuilder: (context, index) {
-//                         final item = provider.allFeedback[index];
-//                       //  debugPrint(item.toString());
-//                       final String? photoStr = item["studentId"]?["photo"];
-//         final bool hasPhoto = photoStr != null && photoStr.isNotEmpty;
-//                         return Container(
-//                           margin: const EdgeInsets.only(bottom: 12),
-//                           padding: const EdgeInsets.all(16),
-//                           decoration: BoxDecoration(
-//                             color: Colors.white10,
-//                             borderRadius: BorderRadius.circular(15),
-//                           ),
+                        final String nameStr =
+                            item["name"] ??
+                            item["studentId"]?["name"] ??
+                            "Student";
+                        String? photoStr = item["studentId"]?["photo"];
 
-//                           child: Column(
-//                             crossAxisAlignment: CrossAxisAlignment.start,
-//                             children: [
-//                               // Text(
-//                               //   item["studentId"]?["name"] ?? "Student",
-//                               //   style: const TextStyle(
-//                               //     color: Colors.white,
-//                               //     fontWeight: FontWeight.bold,
-//                               //   ),
-//                               // ),
-//                               Row(
-//   children: [
+                        // Change type to generic ImageProvider to accept Network or Memory images
+                        ImageProvider? avatarImage;
 
-//   CircleAvatar(
-//   radius: 22,
+                        if (photoStr != null && photoStr.trim().isNotEmpty) {
+                          try {
+                            final String cleanPhoto = photoStr.trim();
 
-//   backgroundImage: (() {
-//     try {
-//       final photo =
-//           item["studentId"]?["photo"];
+                            // Check if it's a web URL from Cloudinary
+                            if (cleanPhoto.startsWith('http://') ||
+                                cleanPhoto.startsWith('https://')) {
+                              avatarImage = NetworkImage(cleanPhoto);
+                            } else {
+                              // Otherwise, process as base64 raw string
+                              String base64Data = cleanPhoto;
+                              if (base64Data.contains(',')) {
+                                base64Data = base64Data.split(',').last;
+                              }
+                              base64Data = base64Data.replaceAll(
+                                RegExp(r'\s+'),
+                                '',
+                              );
+                              avatarImage = MemoryImage(
+                                base64Decode(base64Data),
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint("Decoding failed for $nameStr: $e");
+                            avatarImage =
+                                null; // Falls back to default icon gracefully
+                          }
+                        }
 
-//       if (photo == null ||
-//           photo.toString().isEmpty) {
-//         return null;
-//       }
-
-//       return MemoryImage(
-//         base64Decode(photo),
-//       );
-//     } catch (_) {
-//       return null;
-//     }
-//   })(),
-
-//   child: const Icon(
-//     Icons.person,
-//     color: Colors.white,
-//   ),
-// ),
-
-//     const SizedBox(width: 10),
-
-//     Expanded(
-//       child: Text(
-//         item["studentId"]?["name"] ??
-//             "Student",
-//         style: const TextStyle(
-//           color: Colors.white,
-//           fontWeight: FontWeight.bold,
-//           fontSize: 15,
-//         ),
-//       ),
-//     ),
-//   ],
-// ),
-
-//                               const SizedBox(height: 8),
-
-//                               Text(
-//                                 item["message"] ?? "",
-//                                 style: const TextStyle(color: Colors.white70),
-//                               ),
-
-//                               const SizedBox(height: 8),
-
-//                               Row(
-//                                 children: List.generate(5, (i) {
-//                                   return Icon(
-//                                     i < (item["rating"] ?? 0)
-//                                         ? Icons.star
-//                                         : Icons.star_border,
-//                                     color: Colors.amber,
-//                                     size: 16,
-//                                   );
-//                                 }),
-//                               ),
-//                             ],
-//                           ),
-//                         );
-//                       },
-//                     );
-//                   },
-//                 ),
-Consumer<FeedbackProvider>(
-  builder: (context, provider, child) {
-    if (provider.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (provider.allFeedback.isEmpty) {
-      return const Text(
-        "No Feedback Found",
-        style: TextStyle(color: Colors.white),
-      );
-    }
-
-    final count = provider.allFeedback.length.clamp(0, 5);
-
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: count,
-      // itemBuilder: (context, index) {
-      //   final item = provider.allFeedback[index];
-        
-      //   // Extract the photo string safely
-      //   final String? photoStr = item["studentId"]?["photo"];
-      //  final String nameStr = item["name"] ?? item["studentId"]?["name"] ?? "Student";
-      //   final bool hasPhoto = photoStr != null && photoStr.isNotEmpty;
-
-      //   return Container(
-      //     margin: const EdgeInsets.only(bottom: 12),
-      //     padding: const EdgeInsets.all(16),
-      //     decoration: BoxDecoration(
-      //       color: Colors.white10,
-      //       borderRadius: BorderRadius.circular(15),
-      //     ),
-      //     child: Column(
-      //       crossAxisAlignment: CrossAxisAlignment.start,
-      //       children: [
-      //         Row(
-      //           children: [
-      //             CircleAvatar(
-      //               radius: 22,
-      //               backgroundColor: Colors.white24, // Subtle fallback background color
-      //               backgroundImage: (() {
-      //                 if (!hasPhoto) return null;
-      //                 try {
-      //                   return MemoryImage(
-      //                     base64Decode(photoStr),
-      //                   );
-      //                 } catch (_) {
-      //                   return null; // Return null if base64 decoding fails
-      //                 }
-      //               })(),
-      //               // FIX: If user has a valid photo, child is null (invisible icon). 
-      //               // If no photo, it shows the person icon!
-      //               child: !hasPhoto 
-      //                   ? const Icon(
-      //                       Icons.person,
-      //                       color: Colors.white,
-      //                     )
-      //                   : null,
-      //             ),
-      //             const SizedBox(width: 10),
-      //             Expanded(
-      //               child: Text(
-      //                 nameStr,
-      //                 style: const TextStyle(
-      //                   color: Colors.white,
-      //                   fontWeight: FontWeight.bold,
-      //                   fontSize: 15,
-      //                 ),
-      //               ),
-      //             ),
-      //           ],
-      //         ),
-      //         const SizedBox(height: 8),
-      //         Text(
-      //           item["message"] ?? "",
-      //           style: const TextStyle(color: Colors.white70),
-      //         ),
-      //         const SizedBox(height: 8),
-      //         Row(
-      //           children: List.generate(5, (i) {
-      //             return Icon(
-      //               i < (item["rating"] ?? 0)
-      //                   ? Icons.star
-      //                   : Icons.star_border,
-      //               color: Colors.amber,
-      //               size: 16,
-      //             );
-      //           }),
-      //         ),
-      //       ],
-      //     ),
-      //   );
-      // },
-      itemBuilder: (context, index) {
-  final item = provider.allFeedback[index];
-  
-  // 1. Safely extract the data
-  final String nameStr = item["name"] ?? item["studentId"]?["name"] ?? "Student";
-  String? photoStr = item["studentId"]?["photo"];
-
-  MemoryImage? avatarImage;
-
-  // 2. Clean the string and try decoding
-  if (photoStr != null && photoStr.trim().isNotEmpty) {
-    try {
-      // Remove data URI prefix if it exists (e.g., "data:image/png;base64,")
-      if (photoStr.contains(',')) {
-        photoStr = photoStr.split(',').last;
-      }
-      
-      // Clean up any stray whitespaces or newlines
-      photoStr = photoStr.replaceAll(RegExp(r'\s+'), '');
-
-      avatarImage = MemoryImage(base64Decode(photoStr));
-    } catch (e) {
-      debugPrint("Decoding failed for $nameStr: $e");
-      avatarImage = null; // Quietly drop down to fallback icon on failure
-    }
-  }
-
-  return Container(
-    margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white10,
-      borderRadius: BorderRadius.circular(15),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            // 3. Keep the CircleAvatar extremely simple and reactive
-            CircleAvatar(
-              radius: 22,
-              backgroundColor: Colors.white24,
-              backgroundImage: avatarImage,
-              child: avatarImage == null
-                  ? const Icon(
-                      Icons.person,
-                      color: Colors.white,
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                nameStr,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(AppGaps.padding),
+                          decoration: BoxDecoration(
+                            color: Colors.white10,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 22,
+                                    backgroundColor: Colors.white24,
+                                    backgroundImage: avatarImage,
+                                    child: avatarImage == null
+                                        ? const Icon(
+                                            Icons.person,
+                                            color: AppColors.white,
+                                          )
+                                        : null,
+                                  ),
+                                  AppSpacing.w10,
+                                  Expanded(
+                                    child: Text(
+                                      nameStr,
+                                      style: const TextStyle(
+                                        color: AppColors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              AppSpacing.h5,
+                              Text(
+                                item["message"] ?? "",
+                                style: const TextStyle(color: Colors.white70),
+                              ),
+                              AppSpacing.h5,
+                              Row(
+                                children: List.generate(5, (i) {
+                                  return Icon(
+                                    i < (item["rating"] ?? 0)
+                                        ? Icons.star
+                                        : Icons.star_border,
+                                    color: Colors.amber,
+                                    size: 16,
+                                  );
+                                }),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          item["message"] ?? "",
-          style: const TextStyle(color: Colors.white70),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: List.generate(5, (i) {
-            return Icon(
-              i < (item["rating"] ?? 0) ? Icons.star : Icons.star_border,
-              color: Colors.amber,
-              size: 16,
-            );
-          }),
-        ),
-      ],
-    ),
-  );
-}
-    );
-  },
-),
 
                 SizedBox(height: Responsive.spacing(context, 0.04)),
               ],
@@ -446,11 +254,12 @@ Consumer<FeedbackProvider>(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        // ignore: deprecated_member_use
-        color: Colors.orange.withOpacity(0.15),
+        // 0.15 is exactly 15% opacity
+        color: Colors.orange.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
-        // ignore: deprecated_member_use
-        border: Border.all(color: Colors.orange.withOpacity(0.4)),
+
+        // 0.40 is exactly 40% opacity
+        border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
       ),
       child: Text(
         message,
@@ -459,17 +268,15 @@ Consumer<FeedbackProvider>(
     );
   }
 
-
   /// WELCOME SECTION
   Widget _buildWelcomeSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-
       children: [
         Text(
           "Welcome Back 👋",
           style: TextStyle(
-            color: Colors.white,
+            color: AppColors.white,
             fontSize: Responsive.fontSize(context, 0.06, min: 20, max: 28),
             fontWeight: FontWeight.bold,
           ),
@@ -491,7 +298,7 @@ Consumer<FeedbackProvider>(
     return Text(
       title,
       style: TextStyle(
-        color: Colors.white,
+        color: AppColors.white,
         fontSize: Responsive.fontSize(context, 0.055, min: 16, max: 24),
         fontWeight: FontWeight.bold,
       ),
@@ -503,7 +310,10 @@ Consumer<FeedbackProvider>(
     final width = Responsive.contentWidth(context);
     if (provider.banners.isEmpty) {
       return const Center(
-        child: Text("No Banners Found", style: TextStyle(color: Colors.white)),
+        child: Text(
+          "No Banners Found",
+          style: TextStyle(color: AppColors.white),
+        ),
       );
     }
 
@@ -522,30 +332,24 @@ Consumer<FeedbackProvider>(
         autoPlayAnimationDuration: const Duration(milliseconds: 900),
         enableInfiniteScroll: true,
       ),
-
       items: provider.banners.map((banner) {
         return Container(
           margin: EdgeInsets.symmetric(
             horizontal: width * 0.01,
             vertical: Responsive.spacing(context, 0.008, min: 4, max: 12),
           ),
-
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(22),
-
             boxShadow: [
               BoxShadow(
-                // ignore: deprecated_member_use
-                color: Colors.black.withOpacity(0.12),
+                color: AppColors.black.withAlpha(30), // 0.12 * 255
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
             ],
           ),
-
           child: ClipRRect(
             borderRadius: BorderRadius.circular(22),
-
             child: CachedAppImage(
               url: banner.image,
               fit: BoxFit.cover,
@@ -573,8 +377,7 @@ Consumer<FeedbackProvider>(
     ),
     boxShadow: [
       BoxShadow(
-        // ignore: deprecated_member_use
-        color: Colors.black.withOpacity(0.25),
+        color: AppColors.black.withOpacity(0.25),
         blurRadius: 15,
         offset: const Offset(0, 8),
       ),
@@ -612,7 +415,7 @@ Consumer<FeedbackProvider>(
     );
   }
 
-  /// Grid card (tablet/desktop) — flex layout fits fixed grid cell height.
+  /// Grid card (tablet/desktop)
   Widget _buildCategoryCardGrid(BuildContext context, CategoryModel category) {
     return Container(
       decoration: _categoryCardDecoration,
@@ -660,7 +463,7 @@ Consumer<FeedbackProvider>(
           maxLines: compact ? 2 : null,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: Colors.white,
+            color: AppColors.white,
             fontSize: compact
                 ? 14
                 : Responsive.fontSize(context, 0.05, min: 14, max: 20),
@@ -697,7 +500,7 @@ Consumer<FeedbackProvider>(
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF8B5CF6),
-              foregroundColor: Colors.white,
+              foregroundColor: AppColors.white,
               elevation: 0,
               padding: EdgeInsets.symmetric(
                 vertical: compact
@@ -761,13 +564,13 @@ Consumer<FeedbackProvider>(
     }
   }
 
-  /// CATEGORY SECTION — 1 column on phone, 2–3 on tablet/desktop
+  /// CATEGORY SECTION
   Widget _buildCategorySection(BuildContext context, HomeProvider provider) {
     if (provider.categories.isEmpty) {
       return const Center(
         child: Text(
           "No Categories Found",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: AppColors.white),
         ),
       );
     }
@@ -806,83 +609,41 @@ Consumer<FeedbackProvider>(
     );
   }
 
- 
-Widget buildFeedbackSection(
-    double width,
-    double height) {
+  Widget buildFeedbackSection(double width, double height) {
+    return Consumer<FeedbackProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading && provider.allFeedback.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-  return Consumer<FeedbackProvider>(
-
-    builder: (context, provider, child) {
-
-      /// Loading state
-      if (provider.isLoading &&
-          provider.allFeedback.isEmpty) {
-
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-
-      }
-
-      /// Empty state
-      if (!provider.isLoading &&
-          provider.allFeedback.isEmpty) {
-
-        return const Center(
-          child: Text(
-            "No Feedback Found",
-            style: TextStyle(
-              color: Colors.white,
-            ),
-          ),
-        );
-
-      }
-
-      /// Success state
-      return ListView.builder(
-
-        shrinkWrap: true,
-
-        physics:
-            const NeverScrollableScrollPhysics(),
-
-        itemCount:
-            provider.allFeedback.length,
-
-        itemBuilder: (context,index){
-
-          final item =
-              provider.allFeedback[index];
-
-          return Container(
-            margin:
-                EdgeInsets.only(
-                    bottom:
-                        height*0.02),
-
-            padding:
-                EdgeInsets.all(
-                    width*0.045),
-
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius:
-                  BorderRadius.circular(
-                      24),
-            ),
-
+        if (!provider.isLoading && provider.allFeedback.isEmpty) {
+          return const Center(
             child: Text(
-              item["message"] ?? "",
+              "No Feedback Found",
+              style: TextStyle(color: AppColors.white),
             ),
           );
+        }
 
-        },
-      );
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: provider.allFeedback.length,
+          itemBuilder: (context, index) {
+            final item = provider.allFeedback[index];
 
-    },
-  );
+            return Container(
+              margin: EdgeInsets.only(bottom: height * 0.02),
+              padding: EdgeInsets.all(width * 0.045),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Text(item["message"] ?? ""),
+            );
+          },
+        );
+      },
+    );
+  }
 }
-}
-

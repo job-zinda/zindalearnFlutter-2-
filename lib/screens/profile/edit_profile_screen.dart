@@ -1,5 +1,401 @@
+// import 'package:flutter/material.dart';
+// import 'package:provider/provider.dart';
+// import '../../providers/profile_provider.dart';
+// import '../../widgets/responsive_body.dart';
+
+// class EditProfileScreen extends StatefulWidget {
+//   final String token;
+//   final Map<String, dynamic> profileData;
+
+//   const EditProfileScreen({
+//     super.key,
+//     required this.token,
+//     required this.profileData,
+//   });
+
+//   @override
+//   State<EditProfileScreen> createState() =>
+//       _EditProfileScreenState();
+// }
+
+// class _EditProfileScreenState
+//     extends State<EditProfileScreen> {
+
+//   final formKey = GlobalKey<FormState>();
+
+//   late TextEditingController nameController;
+//   late TextEditingController phoneController;
+
+//   @override
+//   void initState() {
+//     super.initState();
+
+//     nameController = TextEditingController(
+//       text: widget.profileData["name"] ?? "",
+//     );
+
+//     phoneController = TextEditingController(
+//       text: widget.profileData["phone"] ?? "",
+//     );
+//   }
+
+//   @override
+//   void dispose() {
+//     nameController.dispose();
+//     phoneController.dispose();
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+
+//     final provider =
+//         context.watch<ProfileProvider>();
+
+//     return Scaffold(
+//       backgroundColor: const Color(0xFF0B023D),
+
+//       appBar: AppBar(
+//         backgroundColor: const Color(0xFF0B023D),
+//         elevation: 0,
+//         title: const Text("Edit Profile"),
+//       ),
+
+//       body: Form(
+//         key: formKey,
+
+//         child: ResponsiveBody(
+//           child: ListView(
+//           children: [
+
+//             const SizedBox(height: 10),
+
+//             /// HEADER CARD
+//             _buildCard(
+//               child: ListTile(
+//                 leading: const CircleAvatar(
+//                   backgroundColor: Colors.white24,
+//                   child: Icon(
+//                     Icons.edit,
+//                     color: Colors.white,
+//                   ),
+//                 ),
+
+//                 title: const Text(
+//                   "Update Your Info",
+//                   style: TextStyle(
+//                     color: Colors.white,
+//                   ),
+//                 ),
+
+//                 subtitle: const Text(
+//                   "Change your name & phone number",
+//                   style: TextStyle(
+//                     color: Colors.white54,
+//                   ),
+//                 ),
+//               ),
+//             ),
+
+//             const SizedBox(height: 20),
+
+//             _sectionTitle("Edit Details"),
+
+//             _buildCard(
+//               child: Column(
+//                 children: [
+//                   Consumer<ProfileProvider>(
+//   builder: (context, provider, child) {
+//     return Column(
+//       children: [
+
+//         const SizedBox(height: 15),
+
+//        Stack(
+//   clipBehavior: Clip.none,
+//   children: [
+
+//     GestureDetector(
+//       onTap: () async {
+//         await provider.pickImageFromCamera();
+//       },
+
+//       child: CircleAvatar(
+//         radius: 60,
+//         backgroundColor: Colors.white24,
+
+//         backgroundImage: provider.image != null
+//             ? FileImage(provider.image!)
+//             : null,
+
+//         child: provider.image == null
+//             ? const Icon(
+//                 Icons.person,
+//                 size: 60,
+//                 color: Colors.white,
+//               )
+//             : null,
+//       ),
+//     ),
+
+//     Positioned(
+//       bottom: 0,
+//       right: 0,
+//       child: GestureDetector(
+//         onTap: () async {
+//           await provider.pickImageFromCamera();
+//         },
+
+//         child: Container(
+//           padding: const EdgeInsets.all(8),
+
+//           decoration: const BoxDecoration(
+//             color: Colors.deepPurple,
+//             shape: BoxShape.circle,
+//           ),
+
+//           child: const Icon(
+//             Icons.camera_alt,
+//             color: Colors.white,
+//             size: 18,
+//           ),
+//         ),
+//       ),
+//     ),
+//   ],
+// ),
+
+//         const SizedBox(height: 15),
+
+//         TextButton.icon(
+//           onPressed: () async {
+//             await provider.pickImageFromGallery();
+//           },
+//           icon: const Icon(Icons.photo_library),
+//           label: const Text("Choose from Gallery"),
+//         ),
+
+//         const Divider(
+//           color: Colors.white10,
+//         ),
+//       ],
+//     );
+//   },
+// ),
+
+//                   _tileField(
+//                     icon: Icons.person,
+//                     label: "Name",
+//                     controller: nameController,
+//                   ),
+
+//                   const Divider(
+//                     color: Colors.white10,
+//                   ),
+
+//                   _tileField(
+//                     icon: Icons.phone,
+//                     label: "Phone",
+//                     controller: phoneController,
+//                     keyboard: TextInputType.phone,
+//                   ),
+//                 ],
+//               ),
+//             ),
+
+//             const SizedBox(height: 30),
+
+//             ElevatedButton(
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor:
+//                     const Color.fromARGB(
+//                       255,
+//                       78,
+//                       35,
+//                       131,
+//                     ),
+
+//                 padding:
+//                     const EdgeInsets.symmetric(
+//                   vertical: 14,
+//                 ),
+
+//                 shape:
+//                     RoundedRectangleBorder(
+//                   borderRadius:
+//                       BorderRadius.circular(14),
+//                 ),
+//               ),
+
+//               onPressed:
+//                   provider.isLoading
+//                   ? null
+//                   : () async {
+
+//                       if (!formKey
+//                           .currentState!
+//                           .validate()) {
+//                         return;
+//                       }
+
+//                       final (
+//                         success,
+//                         message,
+//                       ) = await provider
+//                           .updateProfile(
+//                         token: widget.token,
+
+//                         name: nameController.text
+//                             .trim(),
+
+//                         phone:
+//                             phoneController.text
+//                                 .trim(),
+//                       );
+
+//                       if (!context.mounted) {
+//                         return;
+//                       }
+
+//                       ScaffoldMessenger.of(
+//                         context,
+//                       ).showSnackBar(
+//                         SnackBar(
+//                           content: Text(
+//                             message.toString(),
+//                           ),
+//                         ),
+//                       );
+
+//                       if (success) {
+//                         Navigator.pop(
+//                           context,
+//                           true,
+//                         );
+//                       }
+//                     },
+
+//               child: provider.isLoading
+//                   ? const CircularProgressIndicator(
+//                       color: Colors.white,
+//                     )
+//                   : const Text(
+//                       "Save Changes",
+//                       style: TextStyle(
+//                         fontWeight:
+//                             FontWeight.bold,
+//                       ),
+//                     ),
+//             ),
+//           ],
+//         ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   /// CARD
+//   Widget _buildCard({
+//     required Widget child,
+//   }) {
+//     return Container(
+//       decoration: BoxDecoration(
+//         // ignore: deprecated_member_use
+//         color: Colors.white.withOpacity(
+//           0.06,
+//         ),
+
+//         borderRadius:
+//             BorderRadius.circular(18),
+
+//         boxShadow: [
+//           BoxShadow(
+//             // ignore: deprecated_member_use
+//             color: Colors.black.withOpacity(
+//               0.2,
+//             ),
+
+//             blurRadius: 10,
+
+//             offset: const Offset(0, 5),
+//           ),
+//         ],
+//       ),
+
+//       child: child,
+//     );
+//   }
+
+//   /// SECTION TITLE
+//   Widget _sectionTitle(String title) {
+//     return Padding(
+//       padding:
+//           const EdgeInsets.only(bottom: 10),
+
+//       child: Text(
+//         title,
+
+//         style: const TextStyle(
+//           color: Colors.white70,
+//           fontSize: 16,
+//           fontWeight: FontWeight.bold,
+//         ),
+//       ),
+//     );
+//   }
+
+//   /// FORM FIELD
+//   Widget _tileField({
+//     required IconData icon,
+//     required String label,
+//     required TextEditingController controller,
+//     TextInputType keyboard =
+//         TextInputType.text,
+//   }) {
+//     return ListTile(
+//       leading: Icon(
+//         icon,
+//         color: Colors.white,
+//       ),
+
+//       title: TextFormField(
+//         controller: controller,
+
+//         keyboardType: keyboard,
+
+//         style: const TextStyle(
+//           color: Colors.white,
+//         ),
+
+//         validator: (value) {
+
+//           if (value == null ||
+//               value.trim().isEmpty) {
+
+//             return "$label is required";
+//           }
+
+//           return null;
+//         },
+
+//         decoration: InputDecoration(
+//           border: InputBorder.none,
+
+//           labelText: label,
+
+//           labelStyle:
+//               const TextStyle(
+//             color: Colors.white70,
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:zindaonlineschool/providers/feedback_provider.dart';
 import '../../providers/profile_provider.dart';
 import '../../widgets/responsive_body.dart';
 
@@ -14,29 +410,19 @@ class EditProfileScreen extends StatefulWidget {
   });
 
   @override
-  State<EditProfileScreen> createState() =>
-      _EditProfileScreenState();
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _EditProfileScreenState
-    extends State<EditProfileScreen> {
-
+class _EditProfileScreenState extends State<EditProfileScreen> {
   final formKey = GlobalKey<FormState>();
-
   late TextEditingController nameController;
   late TextEditingController phoneController;
 
   @override
   void initState() {
     super.initState();
-
-    nameController = TextEditingController(
-      text: widget.profileData["name"] ?? "",
-    );
-
-    phoneController = TextEditingController(
-      text: widget.profileData["phone"] ?? "",
-    );
+    nameController = TextEditingController(text: widget.profileData["name"] ?? "");
+    phoneController = TextEditingController(text: widget.profileData["phone"] ?? "");
   }
 
   @override
@@ -48,345 +434,177 @@ class _EditProfileScreenState
 
   @override
   Widget build(BuildContext context) {
-
-    final provider =
-        context.watch<ProfileProvider>();
+    final provider = context.watch<ProfileProvider>();
 
     return Scaffold(
       backgroundColor: const Color(0xFF0B023D),
-
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B023D),
         elevation: 0,
         title: const Text("Edit Profile"),
       ),
-
       body: Form(
         key: formKey,
-
         child: ResponsiveBody(
           child: ListView(
-          children: [
-
-            const SizedBox(height: 10),
-
-            /// HEADER CARD
-            _buildCard(
-              child: ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Colors.white24,
-                  child: Icon(
-                    Icons.edit,
-                    color: Colors.white,
+            children: [
+              const SizedBox(height: 10),
+              _buildCard(
+                child: ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Colors.white24,
+                    child: Icon(Icons.edit, color: Colors.white),
                   ),
-                ),
-
-                title: const Text(
-                  "Update Your Info",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-
-                subtitle: const Text(
-                  "Change your name & phone number",
-                  style: TextStyle(
-                    color: Colors.white54,
-                  ),
+                  title: const Text("Update Your Info", style: TextStyle(color: Colors.white)),
+                  subtitle: const Text("Change your name & phone number", style: TextStyle(color: Colors.white54)),
                 ),
               ),
-            ),
-
-            const SizedBox(height: 20),
-
-            _sectionTitle("Edit Details"),
-
-            _buildCard(
-              child: Column(
-                children: [
-                  Consumer<ProfileProvider>(
-  builder: (context, provider, child) {
-    return Column(
-      children: [
-
-        const SizedBox(height: 15),
-
-       Stack(
-  clipBehavior: Clip.none,
-  children: [
-
-    GestureDetector(
-      onTap: () async {
-        await provider.pickImageFromCamera();
-      },
-
-      child: CircleAvatar(
-        radius: 60,
-        backgroundColor: Colors.white24,
-
-        backgroundImage: provider.image != null
-            ? FileImage(provider.image!)
-            : null,
-
-        child: provider.image == null
-            ? const Icon(
-                Icons.person,
-                size: 60,
-                color: Colors.white,
-              )
-            : null,
-      ),
-    ),
-
-    Positioned(
-      bottom: 0,
-      right: 0,
-      child: GestureDetector(
-        onTap: () async {
-          await provider.pickImageFromCamera();
-        },
-
-        child: Container(
-          padding: const EdgeInsets.all(8),
-
-          decoration: const BoxDecoration(
-            color: Colors.deepPurple,
-            shape: BoxShape.circle,
-          ),
-
-          child: const Icon(
-            Icons.camera_alt,
-            color: Colors.white,
-            size: 18,
-          ),
-        ),
-      ),
-    ),
-  ],
-),
-
-        const SizedBox(height: 15),
-
-        TextButton.icon(
-          onPressed: () async {
-            await provider.pickImageFromGallery();
-          },
-          icon: const Icon(Icons.photo_library),
-          label: const Text("Choose from Gallery"),
-        ),
-
-        const Divider(
-          color: Colors.white10,
-        ),
-      ],
-    );
-  },
-),
-
-                  _tileField(
-                    icon: Icons.person,
-                    label: "Name",
-                    controller: nameController,
-                  ),
-
-                  const Divider(
-                    color: Colors.white10,
-                  ),
-
-                  _tileField(
-                    icon: Icons.phone,
-                    label: "Phone",
-                    controller: phoneController,
-                    keyboard: TextInputType.phone,
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    const Color.fromARGB(
-                      255,
-                      78,
-                      35,
-                      131,
-                    ),
-
-                padding:
-                    const EdgeInsets.symmetric(
-                  vertical: 14,
-                ),
-
-                shape:
-                    RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(14),
-                ),
-              ),
-
-              onPressed:
-                  provider.isLoading
-                  ? null
-                  : () async {
-
-                      if (!formKey
-                          .currentState!
-                          .validate()) {
-                        return;
-                      }
-
-                      final (
-                        success,
-                        message,
-                      ) = await provider
-                          .updateProfile(
-                        token: widget.token,
-
-                        name: nameController.text
-                            .trim(),
-
-                        phone:
-                            phoneController.text
-                                .trim(),
-                      );
-
-                      if (!context.mounted) {
-                        return;
-                      }
-
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            message.toString(),
-                          ),
-                        ),
-                      );
-
-                      if (success) {
-                        Navigator.pop(
-                          context,
-                          true,
+              const SizedBox(height: 20),
+              _sectionTitle("Edit Details"),
+              _buildCard(
+                child: Column(
+                  children: [
+                    Consumer<ProfileProvider>(
+                      builder: (context, provider, child) {
+                        return Column(
+                          children: [
+                            const SizedBox(height: 15),
+                            Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                GestureDetector(
+                                  onTap: () async => await provider.pickImageFromCamera(),
+                                  child: CircleAvatar(
+                                    radius: 60,
+                                    backgroundColor: Colors.white24,
+                                    backgroundImage: provider.image != null ? FileImage(provider.image!) : null,
+                                    child: provider.image == null
+                                        ? const Icon(Icons.person, size: 60, color: Colors.white)
+                                        : null,
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: () async => await provider.pickImageFromCamera(),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: const BoxDecoration(color: Colors.deepPurple, shape: BoxShape.circle),
+                                      child: const Icon(Icons.camera_alt, color: Colors.white, size: 18),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 15),
+                            TextButton.icon(
+                              onPressed: () async => await provider.pickImageFromGallery(),
+                              icon: const Icon(Icons.photo_library),
+                              label: const Text("Choose from Gallery"),
+                            ),
+                            const Divider(color: Colors.white10),
+                          ],
                         );
-                      }
-                    },
-
-              child: provider.isLoading
-                  ? const CircularProgressIndicator(
-                      color: Colors.white,
-                    )
-                  : const Text(
-                      "Save Changes",
-                      style: TextStyle(
-                        fontWeight:
-                            FontWeight.bold,
-                      ),
+                      },
                     ),
-            ),
-          ],
-        ),
+                    _tileField(icon: Icons.person, label: "Name", controller: nameController),
+                    const Divider(color: Colors.white10),
+                    _tileField(icon: Icons.phone, label: "Phone", controller: phoneController, keyboard: TextInputType.phone),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 78, 35, 131),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: provider.isLoading
+                    ? null
+                    : () async {
+                        if (!formKey.currentState!.validate()) return;
+
+                        final (success, message) = await provider.updateProfile(
+                          token: widget.token,
+                          name: nameController.text.trim(),
+                          phone: phoneController.text.trim(),
+                        );
+
+                        if (!context.mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(message.toString())),
+                        );
+
+                       if (success) {
+
+  await context
+      .read<FeedbackProvider>()
+      .fetchAllUsersFeedback(
+        widget.token,
+        force: true,
+      );
+
+  Navigator.pop(context, true);
+}
+                      },
+                child: provider.isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text("Save Changes", style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// CARD
-  Widget _buildCard({
-    required Widget child,
-  }) {
+  Widget _buildCard({required Widget child}) {
     return Container(
       decoration: BoxDecoration(
-        // ignore: deprecated_member_use
-        color: Colors.white.withOpacity(
-          0.06,
-        ),
-
-        borderRadius:
-            BorderRadius.circular(18),
-
+        color: Colors.white.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
-            color: Colors.black.withOpacity(
-              0.2,
-            ),
-
+            color: Colors.black.withOpacity(0.2),
             blurRadius: 10,
-
             offset: const Offset(0, 5),
           ),
         ],
       ),
-
       child: child,
     );
   }
 
-  /// SECTION TITLE
   Widget _sectionTitle(String title) {
     return Padding(
-      padding:
-          const EdgeInsets.only(bottom: 10),
-
+      padding: const EdgeInsets.only(bottom: 10),
       child: Text(
         title,
-
-        style: const TextStyle(
-          color: Colors.white70,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
+        style: const TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.bold),
       ),
     );
   }
 
-  /// FORM FIELD
   Widget _tileField({
     required IconData icon,
     required String label,
     required TextEditingController controller,
-    TextInputType keyboard =
-        TextInputType.text,
+    TextInputType keyboard = TextInputType.text,
   }) {
     return ListTile(
-      leading: Icon(
-        icon,
-        color: Colors.white,
-      ),
-
+      leading: Icon(icon, color: Colors.white),
       title: TextFormField(
         controller: controller,
-
         keyboardType: keyboard,
-
-        style: const TextStyle(
-          color: Colors.white,
-        ),
-
-        validator: (value) {
-
-          if (value == null ||
-              value.trim().isEmpty) {
-
-            return "$label is required";
-          }
-
-          return null;
-        },
-
+        style: const TextStyle(color: Colors.white),
+        validator: (value) => (value == null || value.trim().isEmpty) ? "$label is required" : null,
         decoration: InputDecoration(
           border: InputBorder.none,
-
           labelText: label,
-
-          labelStyle:
-              const TextStyle(
-            color: Colors.white70,
-          ),
+          labelStyle: const TextStyle(color: Colors.white70),
         ),
       ),
     );
