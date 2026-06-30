@@ -1,203 +1,10 @@
-// import 'dart:io';
-
-// import 'package:flutter/material.dart';
-// import 'package:http/http.dart' as http;
-// import 'package:zindaonlineschool/services/chat_service.dart';
-
-
-// class ChatProvider with ChangeNotifier {
-//   final ChatService _service = ChatService();
-
-//   bool _isLoading = false;
-//   bool get isLoading => _isLoading;
-
-//   bool _requestSent = false;
-//   bool get requestSent => _requestSent;
-
-//   List<dynamic> _rooms = [];
-//   List<dynamic> get rooms => _rooms;
-
-//   List<dynamic> _messages = [];
-//   List<dynamic> get messages => _messages;
-
-//   /// CONNECT TUTOR
-//   Future<Map<String, dynamic>?> connectTutor(
-//     String tutorId,
-//     String token,
-//   ) async {
-//     try {
-//       _isLoading = true;
-//       notifyListeners();
-
-//       final res = await _service.connectRequest(tutorId, token);
-
-//       if (res != null && res["room"] != null) {
-//         _requestSent = true;
-//         await fetchRooms(token);
-//         notifyListeners();
-//       }
-
-//       return res;
-//     } catch (e) {
-//       // debugPrint("Connect error: $e");
-//       return null;
-//     } finally {
-//       _isLoading = false;
-//       notifyListeners();
-//     }
-//   }
-
-//   /// GET ROOMS
-//   Future<void> fetchRooms(String token) async {
-//     try {
-//       final res = await _service.getChatRooms(token);
-//       _rooms = res;
-//       notifyListeners();
-//     } catch (e) {
-//       // debugPrint("Room error: $e");
-//     }
-//   }
-
-//   /// GET MESSAGES
-//   Future<void> fetchMessages(String roomId, String token) async {
-//     try {
-//       final res = await _service.getMessages(roomId, token);
-//       _messages = res;
-//       notifyListeners();
-//     } catch (e) {
-//       // debugPrint("Message error: $e");
-//     }
-//   }
-
-//   Future<void> sendMessage(String roomId, String message, String token) async {
-//     try {
-//       await _service.sendMessage(roomId, message, token);
-
-//       ///  SMALL DELAY FIX (VERY IMPORTANT IN CHAT APPS)
-//       await Future.delayed(const Duration(milliseconds: 200));
-
-//       final updated = await _service.getMessages(roomId, token);
-
-//       _messages = List.from(updated); //
-//       notifyListeners();
-//     } catch (e) {
-//       // debugPrint("Send error: $e");
-//     }
-//   }
-
-//   Future<void> editMessage(
-//     String messageId,
-//     String message,
-//     String token,
-//     String roomId,
-//   ) async {
-//     try {
-//       await _service.editMessage(messageId, message, token);
-
-//       final updated = await _service.getMessages(roomId, token);
-
-//       _messages = updated;
-
-//       notifyListeners();
-//     } catch (e) {
-//       // debugPrint("Edit error: $e");
-//     }
-//   }
-
-//   /// DELETE MESSAGE
-//   Future<void> deleteMessage(
-//     String messageId,
-//     String roomId,
-//     String token,
-//   ) async {
-//     try {
-//       await _service.deleteMessage(messageId, token);
-
-//       final updated = await _service.getMessages(roomId, token);
-
-//       _messages = updated;
-
-//       notifyListeners();
-//     } catch (e) {
-//       // debugPrint("Delete error: $e");
-//     }
-//   }
-
-  
-//   Future<void> markAsRead(String roomId, String token) async {
-//     try {
-//       await _service.markAsRead(roomId, token);
-//     } catch (e) {
-//       // debugPrint("Read error: $e");
-//     }
-//   }
-
-//   Future<void> sendImageMessage(String roomId, File image, String token) async {
-//     try {
-//       // final uri = Uri.parse("https://zindalearnbackend.onrender.com/chat/send-image");
-//       final uri = Uri.parse(
-//   "https://api.zindalearn.com/api/chat/send-image"
-// );
-
-//       var request = http.MultipartRequest("POST", uri);
-
-//       request.headers["Authorization"] = "Bearer $token";
-
-//       request.fields["roomId"] = roomId;
-
-//       request.files.add(await http.MultipartFile.fromPath("image", image.path));
-
-//       final response = await request.send();
-
-//       if (response.statusCode == 200 || response.statusCode == 201) {
-//         await fetchMessages(roomId, token);
-//       }
-//     } catch (e) {
-//       // debugPrint("Image send error: $e");
-//     }
-//   }
-//   Future<void> sendVoiceMessage(
-//   String roomId,
-//   File audio,
-//   String token,
-// ) async {
-//   try {
-//     // final uri = Uri.parse("https://zindalearnbackend.onrender.com/api/chat/send-voice");
-//     final uri = Uri.parse(
-//   "https://api.zindalearn.com/api/chat/send-voice"
-// );
-
-//     var request = http.MultipartRequest("POST", uri);
-
-//     request.headers["Authorization"] = "Bearer $token";
-
-//     request.fields["roomId"] = roomId;
-//     request.fields["messageType"] = "voice";
-
-//     request.files.add(
-//       await http.MultipartFile.fromPath(
-//         "audio",
-//         audio.path,
-//       ),
-//     );
-
-//     final response = await request.send();
-
-//     if (response.statusCode == 200 || response.statusCode == 201) {
-//       await fetchMessages(roomId, token);
-//     }
-//   } catch (e) {
-//     // debugPrint("Voice error: $e");
-//   }
-// }
-// }
 
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:zindaonlineschool/services/chat_service.dart';
 
 class ChatProvider with ChangeNotifier {
+  // If this line still shows an error, check the exact spelling inside chat_service.dart
   final ChatService _service = ChatService();
 
   bool _isLoading = false;
@@ -262,7 +69,6 @@ class ChatProvider with ChangeNotifier {
     try {
       await _service.sendMessage(roomId, message, token);
 
-      /// SMALL DELAY FIX (VERY IMPORTANT IN CHAT APPS)
       await Future.delayed(const Duration(milliseconds: 200));
 
       final updated = await _service.getMessages(roomId, token);
@@ -274,16 +80,36 @@ class ChatProvider with ChangeNotifier {
   }
 
   /// EDIT MESSAGE
+  // Future<void> editMessage(String messageId, String message, String token, String roomId) async {
+  //   try {
+  //     await _service.editMessage(messageId, message, token);
+  //     final updated = await _service.getMessages(roomId, token);
+  //     _messages = updated ?? [];
+  //     notifyListeners();
+  //   } catch (e) {
+  //     debugPrint("Edit error: $e");
+  //   }
+  // }
   Future<void> editMessage(String messageId, String message, String token, String roomId) async {
-    try {
-      await _service.editMessage(messageId, message, token);
-      final updated = await _service.getMessages(roomId, token);
-      _messages = updated ?? [];
-      notifyListeners();
-    } catch (e) {
-      debugPrint("Edit error: $e");
+  try {
+    // 1. Tell the backend to update
+    await _service.editMessage(messageId, message, token);
+    
+    // 2. Update the message locally in memory instantly
+    final index = _messages.indexWhere((msg) => msg["_id"] == messageId);
+    if (index != -1) {
+      _messages[index]["text"] = message;
+      _messages[index]["message"] = message;
     }
+
+    // 3. Trigger UI update right away and stop here
+    notifyListeners();
+    
+  } catch (e) {
+    debugPrint("Edit error: $e");
+    rethrow; 
   }
+}
 
   /// DELETE MESSAGE
   Future<void> deleteMessage(String messageId, String roomId, String token) async {
@@ -306,44 +132,48 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
-  /// SEND IMAGE MESSAGE
-  Future<void> sendImageMessage(String roomId, File image, String token) async {
+  /// NO BASE64 IMAGE UPLOAD
+  Future<void> sendImagesMessage(String roomId, List<File> images, String token) async {
+    if (images.isEmpty) return;
     try {
-      final uri = Uri.parse("https://api.zindalearn.com/api/chat/send-image");
-      var request = http.MultipartRequest("POST", uri);
+      _isLoading = true;
+      notifyListeners();
 
-      request.headers["Authorization"] = "Bearer $token";
-      request.fields["roomId"] = roomId;
-      request.files.add(await http.MultipartFile.fromPath("image", image.path));
+      final success = await _service.sendImages(roomId, images, token);
 
-      final response = await request.send();
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (success) {
+        await Future.delayed(const Duration(milliseconds: 200));
         await fetchMessages(roomId, token);
       }
     } catch (e) {
-      debugPrint("Image send error: $e");
+      debugPrint("Images provider failure: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
-
-  /// SEND VOICE MESSAGE
-  Future<void> sendVoiceMessage(String roomId, File audio, String token) async {
+/// Sends a raw audio recording file directly to the Cloudinary backend structure
+  Future<void> sendVoiceMessage(String roomId, File audioFile, String token) async {
+    if (!audioFile.existsSync()) return;
     try {
-      final uri = Uri.parse("https://api.zindalearn.com/api/chat/send-voice");
-      var request = http.MultipartRequest("POST", uri);
+      _isLoading = true;
+      notifyListeners();
 
-      request.headers["Authorization"] = "Bearer $token";
-      request.fields["roomId"] = roomId;
-      request.fields["messageType"] = "voice";
-      request.files.add(await http.MultipartFile.fromPath("audio", audio.path));
+      // 🛠️ CRITICAL FIX: Bypass Base64 translation.
+      // Pass the audio file directly into the multi-part loader array, 
+      // exactly like how you process images!
+      final success = await _service.sendImages(roomId, [audioFile], token);
 
-      final response = await request.send();
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (success) {
+        // A short delay gives Cloudinary time to complete processing before fetching fresh logs
+        await Future.delayed(const Duration(milliseconds: 300));
         await fetchMessages(roomId, token);
       }
     } catch (e) {
-      debugPrint("Voice error: $e");
+      debugPrint("Voice file streaming error: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
-}
+  }

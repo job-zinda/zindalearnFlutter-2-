@@ -1,10 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:zindaonlineschool/core/constants/app_colors.dart';
 import 'package:zindaonlineschool/screens/tutor/tutor_screen.dart';
 import 'package:zindaonlineschool/widgets/custom_searchbar.dart';
-
 import '../../core/utils/responsive.dart';
 import '../../models/course_model.dart';
 import '../../providers/course_provider.dart';
@@ -50,13 +47,16 @@ class _CoursesScreenState extends State<CoursesScreen> {
       bool matchesType = false;
       if (widget.sessionType.isEmpty || widget.sessionType == "none") {
         matchesType = true;
-      } else if (widget.sessionType == "skill_base" || widget.sessionType == "talent_base") {
+      } else if (widget.sessionType == "skill_base" ||
+          widget.sessionType == "talent_base") {
         matchesType = true;
       } else {
         matchesType = course.sectionType == widget.sessionType;
       }
 
-      bool matchesSearch = course.title.toLowerCase().contains(courseSearchQuery.toLowerCase());
+      bool matchesSearch = course.title.toLowerCase().contains(
+        courseSearchQuery.toLowerCase(),
+      );
 
       return matchesType && matchesSearch;
     }).toList();
@@ -70,7 +70,9 @@ class _CoursesScreenState extends State<CoursesScreen> {
         actions: const [Padding(padding: EdgeInsets.only(right: 12))],
       ),
       body: ResponsiveBody(
-        padding: EdgeInsets.symmetric(horizontal: Responsive.screenPadding(context).left),
+        padding: EdgeInsets.symmetric(
+          horizontal: Responsive.screenPadding(context).left,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -101,21 +103,35 @@ class _CoursesScreenState extends State<CoursesScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.cloud_off, color: Colors.white38, size: 48),
+                          const Icon(
+                            Icons.cloud_off,
+                            color: Colors.white38,
+                            size: 48,
+                          ),
                           const SizedBox(height: 12),
                           Text(
                             provider.errorMessage,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(color: Colors.white70, fontSize: 14),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
-                            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6C63FF)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF6C63FF),
+                            ),
                             onPressed: () {
-                              context.read<CourseProvider>().fetchCourses(widget.categoryId);
+                              context.read<CourseProvider>().fetchCourses(
+                                widget.categoryId,
+                              );
                             },
-                            child: const Text("Retry Connection", style: TextStyle(color: Colors.white)),
-                          )
+                            child: const Text(
+                              "Retry Connection",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -150,8 +166,10 @@ class _CoursesScreenState extends State<CoursesScreen> {
       return ListView.separated(
         padding: padding,
         itemCount: courses.length,
-        separatorBuilder: (_, _) => SizedBox(height: Responsive.spacing(context, 0.025)),
-        itemBuilder: (context, index) => _buildCourseCard(context, courses[index]),
+        separatorBuilder: (_, _) =>
+            SizedBox(height: Responsive.spacing(context, 0.025)),
+        itemBuilder: (context, index) =>
+            _buildCourseCard(context, courses[index]),
       );
     }
 
@@ -169,7 +187,8 @@ class _CoursesScreenState extends State<CoursesScreen> {
           desktop: 0.72,
         ),
       ),
-      itemBuilder: (context, index) => _buildCourseCard(context, courses[index]),
+      itemBuilder: (context, index) =>
+          _buildCourseCard(context, courses[index]),
     );
   }
 
@@ -253,7 +272,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       // backgroundColor: const Color(0xFF6C63FF),
-                      backgroundColor:  const Color(0xFF8B5CF6),
+                      backgroundColor: const Color(0xFF8B5CF6),
                       foregroundColor: Colors.white,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 10),
