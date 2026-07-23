@@ -74,19 +74,19 @@ class ChatService {
     );
   }
 
-  /// EDIT MESSAGE
+/// EDIT MESSAGE (CLEANED PRODUCTION VERSION)
   Future editMessage(String messageId, String message, String token) async {
-    final res = await http.post(
+    final res = await http.patch(
       Uri.parse("$baseUrl/chat/message/$messageId"),
       headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",
       },
-      body: jsonEncode({"message": message}),
+      body: jsonEncode({"text": message}),
     );
+
     return jsonDecode(res.body);
   }
-
   /// DELETE MESSAGE
   Future deleteMessage(String messageId, String token) async {
     final res = await http.delete(
@@ -183,6 +183,62 @@ Future<bool> sendImages(
   } catch (e) {
     debugPrint("UPLOAD ERROR : $e");
     return false;
+  }
+}
+
+/// ASSIGNED TUTORS
+/// ASSIGNED TUTORS
+Future<List<dynamic>> getAssignedTutors(String token) async {
+  final res = await http.get(
+    Uri.parse("$baseUrl/student/my-assigned-tutors"),
+    headers: {"Authorization": "Bearer $token"},
+  );
+
+  // debugPrint("ASSIGNED TUTORS STATUS: ${res.statusCode}");
+  // debugPrint("ASSIGNED TUTORS RAW: ${res.body}");   // <-- add this line
+
+  final decoded = jsonDecode(res.body);
+  if (decoded is List) return decoded;
+  if (decoded is Map) {
+    return decoded["tutors"] ?? decoded["tuters"] ?? decoded["data"] ?? [];
+  }
+  return [];
+}
+/// Fetches or creates a direct student-tutor room
+Future<Map<String, dynamic>?> getStudentTutorRoom(
+  String tutorId,
+  String token,
+) async {
+  try {
+    final uri = Uri.parse("$baseUrl/chat/student-tutor-room/$tutorId");
+
+    final res = await http.post(
+      uri,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    debugPrint("STUDENT-TUTOR ROOM STATUS: ${res.statusCode}");
+    debugPrint("STUDENT-TUTOR ROOM RESPONSE: ${res.body}");
+
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      final decoded = jsonDecode(res.body);
+      if (decoded is Map) {
+        if (decoded["room"] is Map) {
+          return Map<String, dynamic>.from(decoded["room"]);
+        }
+        if (decoded["data"] is Map) {
+          return Map<String, dynamic>.from(decoded["data"]);
+        }
+        return Map<String, dynamic>.from(decoded);
+      }
+    }
+    return null;
+  } catch (e) {
+    debugPrint("Error fetching student-tutor room: $e");
+    return null;
   }
 }
 }

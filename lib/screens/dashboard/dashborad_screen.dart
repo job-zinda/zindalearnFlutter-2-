@@ -371,6 +371,7 @@ import 'package:zindaonlineschool/core/utils/responsive.dart';
 import 'package:zindaonlineschool/providers/chat_provider.dart';
 import 'package:zindaonlineschool/providers/tutor_provider.dart';
 import 'package:zindaonlineschool/screens/chat/chat_room_screen.dart';
+import 'package:zindaonlineschool/screens/chat/chat_screen.dart';
 import 'package:zindaonlineschool/screens/home/home_screen/home_screen.dart';
 import 'package:zindaonlineschool/screens/settings/settings_screen.dart';
 import 'package:zindaonlineschool/screens/tutor/tutor_screen.dart';
@@ -448,41 +449,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     // Chat Tab
-    if (index == 2) {
-      setState(() {
-        _chatLoading = true;
-      });
-
-      final provider = context.read<ChatProvider>();
-      await provider.fetchRooms(widget.token);
-
-      if (!mounted) return;
-
-      setState(() {
-        _chatLoading = false;
-      });
-
-      if (provider.rooms.isNotEmpty) {
-        roomId = provider.rooms.first["_id"];
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ChatRoomScreen(
-              roomId: roomId!,
-              token: widget.token,
-            ),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("No chat rooms found"),
-          ),
-        );
-      }
-      return;
-    }
+  if (index == 2) {
+    // Instead of looking for rooms and showing an error,
+    // just take the user directly to your ChatScreen.
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatScreen(token: widget.token),
+      ),
+    );
+    return; // Stop here, don't do anything else.
+  }
 
     // Home & Settings
     setState(() {
@@ -490,28 +467,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  // Widget _buildMainContent() {
-  //   return Stack(
-  //     children: [
-  //       IndexedStack(
-  //         index: currentIndex > 2 ? 2 : currentIndex,
-  //         children: [
-  //           _screenForIndex(0),
-  //           _screenForIndex(1),
-  //           const SizedBox(), 
-  //           _screenForIndex(3),
-  //         ],
-  //       ),
-  //       if (_chatLoading)
-  //         const ColoredBox(
-  //           color: Color(0x880B023D),
-  //           child: Center(
-  //             child: CircularProgressIndicator(color: Colors.white),
-  //           ),
-  //         ),
-  //     ],
-  //   );
-  // }
   Widget _buildMainContent() {
     return Stack(
       children: [

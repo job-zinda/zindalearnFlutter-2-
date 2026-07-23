@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zindaonlineschool/core/constants/app_colors.dart';
 import 'package:zindaonlineschool/core/constants/app_textstyle.dart';
+import 'package:zindaonlineschool/providers/chat_provider.dart';
 import 'package:zindaonlineschool/screens/tutor/tutor_detailes_screen.dart';
 import 'package:zindaonlineschool/widgets/custom_searchbar.dart';
 
@@ -43,6 +44,7 @@ class _TutorsScreenState extends State<TutorsScreen> {
           : widget.courseId;
 
       context.read<TutorProvider>().fetchTutors(cleanCourseId, widget.token);
+       context.read<ChatProvider>().fetchAssignedTutors(widget.token); 
     });
   }
 
@@ -65,6 +67,9 @@ class _TutorsScreenState extends State<TutorsScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<TutorProvider>();
+  final chatProvider = context.watch<ChatProvider>();
+final assignedTutors = chatProvider.assignedTutors;
+
     // 2. Filter tutors list locally based on search query match
     final filteredTutors = provider.tutors.where((tutor) {
       return tutor.name.toLowerCase().contains(tutorSearchQuery.toLowerCase());
@@ -108,7 +113,23 @@ class _TutorsScreenState extends State<TutorsScreen> {
               },
             ),
             SizedBox(height: Responsive.spacing(context, 0.025)),
-
+          if (assignedTutors.isNotEmpty) ...[
+  Text("My Tutors", style: AppTextStyles.subHeading),
+  SizedBox(height: Responsive.spacing(context, 0.015)),
+  SizedBox(
+    height: 128,
+    child: ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemCount: assignedTutors.length,
+      separatorBuilder: (_, __) => const SizedBox(width: 12),
+      itemBuilder: (context, index) =>
+          _buildAssignedTutorCard(context, assignedTutors[index]),
+    ),
+  ),
+  SizedBox(height: Responsive.spacing(context, 0.02)),
+  const Divider(color: Colors.white24, height: 1),
+  SizedBox(height: Responsive.spacing(context, 0.02)),
+],
             // 4. Wrap list/grid views in an Expanded widget area
             Expanded(
               child: provider.isLoading && provider.tutors.isEmpty
@@ -324,4 +345,61 @@ class _TutorsScreenState extends State<TutorsScreen> {
       },
     );
   }
+
+Widget _buildAssignedTutorCard(BuildContext context, dynamic tutor) {
+  final String tutorId =
+      (tutor["_id"] ?? tutor["id"] ?? tutor["tuterId"] ?? tutor["tutorId"] ?? "")
+          .toString();
+  final String name = (tutor["name"] ?? "Tutor").toString();
+  final String image = (tutor["photo"] ?? tutor["image"] ?? "").toString();
+
+  return GestureDetector(
+    onTap: () {
+      if (tutorId.isEmpty) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => TutorDetailsScreen(tutorId: tutorId, token: widget.token),
+        ),
+      );
+    },
+    child: Container(
+      width: 96,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.cardFill,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF8B5CF6), width: 1.4),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 28,
+            backgroundColor: AppColors.white,
+            backgroundImage: image.isNotEmpty
+                ? CachedNetworkImageProvider(image)
+                : null,
+            child: image.isEmpty
+                ? const Icon(Icons.person, color: AppColors.grey)
+                : null,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _formatName(name),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.small.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 }
