@@ -21,6 +21,7 @@ import 'package:zindaonlineschool/providers/chat_provider.dart';
 import 'package:zindaonlineschool/screens/tutor/tutor_detailes_screen.dart';
 import 'package:zindaonlineschool/widgets/responsive_body.dart';
 import 'package:zindaonlineschool/widgets/custom_snackbar.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   final String roomId;
@@ -182,21 +183,32 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     }
   }
 
-  Future<void> _downloadVoiceNote(String url) async {
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      String savePath =
-          "${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.aac";
+Future<void> _downloadVoiceNote(String url) async {
+  try {
+    // Download to a temporary location first — this folder is always
+    // writable without special permissions, but is not user-visible.
+    final tempDir = await getTemporaryDirectory();
+    final extension = url.contains('.m4a') ? 'm4a' : 'aac';
+    final tempPath =
+        "${tempDir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.$extension";
 
-      await Dio().download(url, savePath);
-      if (!mounted) return;
-      CustomSnackbar.success(context, "Saved to Documents!");
-    } catch (e) {
-      if (!mounted) return;
-      CustomSnackbar.error(context, "Failed to download audio file");
-    }
+    await Dio().download(url, tempPath);
+    if (!mounted) return;
+
+    // Hand the file to the native share sheet so the user can pick
+    // exactly where it goes — Downloads, Files, Drive, WhatsApp, etc.
+    // This is the standard, permission-free way to deliver a real,
+    // user-visible file on modern Android/iOS.
+    await Share.shareXFiles(
+      [XFile(tempPath)],
+      text: "Voice note",
+    );
+  } catch (e) {
+    debugPrint("Voice note download error: $e");
+    if (!mounted) return;
+    CustomSnackbar.error(context, "Failed to download audio file");
   }
-
+}
   Future<void> _safelyStopRecordingOnBackground() async {
     try {
       if (await audioRecord.isRecording()) {
