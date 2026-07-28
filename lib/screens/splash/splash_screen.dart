@@ -1,10 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zindaonlineschool/screens/auth/login_screen.dart';
 import 'package:zindaonlineschool/screens/dashboard/dashborad_screen.dart';
 import 'package:zindaonlineschool/core/utils/responsive.dart';
 import 'package:zindaonlineschool/widgets/responsive_body.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -21,24 +21,35 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> checkLogin() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+    final stopwatch = Stopwatch()..start();
+
+    String? token;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      token = prefs.getString("token");
+    } catch (e) {
+      debugPrint("SharedPreferences error: $e");
+    }
+
+    // Ensure the splash is visible for at least 2 seconds, even if the
+    // token check finishes instantly.
+    const minSplashDuration = Duration(seconds: 2);
+    final elapsed = stopwatch.elapsed;
+    if (elapsed < minSplashDuration) {
+      await Future.delayed(minSplashDuration - elapsed);
+    }
 
     if (!mounted) return;
 
     if (token != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => DashboardScreen(token: token),
-        ),
+        MaterialPageRoute(builder: (_) => DashboardScreen(token: token!)),
       );
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => const LoginScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
     }
   }
@@ -65,38 +76,33 @@ class _SplashScreenState extends State<SplashScreen> {
           child: ResponsiveBody(
             alignTop: false,
             child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-
-              Image.asset(
-                "assets/images/Online school logo.png",
-                height: Responsive.value(
-                  context,
-                  mobile: 120.0,
-                  tablet: 140.0,
-                  desktop: 150.0,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  "assets/images/Online school logo.png",
+                  height: Responsive.value(
+                    context,
+                    mobile: 120.0,
+                    tablet: 140.0,
+                    desktop: 150.0,
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              const Text(
-                "Zinda Online School",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                const Text(
+                  "Zinda Online School",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 15),
-
-              const CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 2,
-              ),
-            ],
-          ),
+                const SizedBox(height: 15),
+                const SpinKitFoldingCube(color: Colors.white, size: 40),
+              ],
+            ),
           ),
         ),
       ),

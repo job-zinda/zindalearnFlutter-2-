@@ -1,275 +1,4 @@
 
-// import 'dart:io';
-// import 'package:flutter/material.dart';
-// import 'package:zindaonlineschool/services/chat_service.dart';
-
-// class ChatProvider with ChangeNotifier {
-//   // If this line still shows an error, check the exact spelling inside chat_service.dart
-//   final ChatService _service = ChatService();
-
-//   bool _isLoading = false;
-//   bool get isLoading => _isLoading;
-
-//   bool _requestSent = false;
-//   bool get requestSent => _requestSent;
-
-//   List<dynamic> _rooms = [];
-//   List<dynamic> get rooms => _rooms;
-
-//   List<dynamic> _messages = [];
-//   List<dynamic> get messages => _messages;
-
-//   /// CONNECT TUTOR
-//   Future<Map<String, dynamic>?> connectTutor(String tutorId, String token) async {
-//     try {
-//       _isLoading = true;
-//       notifyListeners();
-
-//       final res = await _service.connectRequest(tutorId, token);
-
-//       if (res != null && res["room"] != null) {
-//         _requestSent = true;
-//         await fetchRooms(token);
-//       }
-
-//       return res;
-//     } catch (e) {
-//       debugPrint("Connect error: $e");
-//       return null;
-//     } finally {
-//       _isLoading = false;
-//       notifyListeners();
-//     }
-//   }
-
-//   /// GET ROOMS
-//   Future<void> fetchRooms(String token) async {
-//     try {
-//       final res = await _service.getChatRooms(token);
-//       _rooms = res ?? [];
-//       notifyListeners();
-//     } catch (e) {
-//       debugPrint("Room error: $e");
-//     }
-//   }
-
-//   /// GET MESSAGES
-//   Future<void> fetchMessages(String roomId, String token) async {
-//     try {
-//       final res = await _service.getMessages(roomId, token);
-//       _messages = res ?? [];
-//       notifyListeners();
-//     } catch (e) {
-//       debugPrint("Message error: $e");
-//     }
-//   }
-
-//   /// SEND MESSAGE
-//   Future<void> sendMessage(String roomId, String message, String token) async {
-//     try {
-//       await _service.sendMessage(roomId, message, token);
-
-//       await Future.delayed(const Duration(milliseconds: 200));
-
-//       final updated = await _service.getMessages(roomId, token);
-//       _messages = List.from(updated ?? []);
-//       notifyListeners();
-//     } catch (e) {
-//       debugPrint("Send error: $e");
-//     }
-//   }
-
-
-// //   Future<void> editMessage(String messageId, String message, String token, String roomId) async {
-// //   try {
-// //     // 1. Tell the backend to update
-// //     await _service.editMessage(messageId, message, token);
-    
-// //     // 2. Update the message locally in memory instantly
-// //     final index = _messages.indexWhere((msg) => msg["_id"] == messageId);
-// //     if (index != -1) {
-// //       _messages[index]["text"] = message;
-// //       _messages[index]["message"] = message;
-// //     }
-
-// //     // 3. Trigger UI update right away and stop here
-// //     notifyListeners();
-    
-// //   } catch (e) {
-// //     debugPrint("Edit error: $e");
-// //     rethrow; 
-// //   }
-// // }
-
-// /// EDIT MESSAGE (SIMPLE & DIRECT)
-//   Future<void> editMessage(String messageId, String message, String token, String roomId) async {
-//     try {
-//       // 1. Tell the backend to update the message
-//       await _service.editMessage(messageId, message, token);
-      
-//       // 2. Immediately pull fresh messages from the database so it matches perfectly
-//       final updated = await _service.getMessages(roomId, token);
-//       _messages = updated ?? [];
-      
-//       // 3. Refresh the screen
-//       notifyListeners();
-      
-//     } catch (e) {
-//       debugPrint("Edit error: $e");
-//     }
-//   }
-
-//   /// DELETE MESSAGE
-//   Future<void> deleteMessage(String messageId, String roomId, String token) async {
-//     try {
-//       await _service.deleteMessage(messageId, token);
-//       final updated = await _service.getMessages(roomId, token);
-//       _messages = updated ?? [];
-//       notifyListeners();
-//     } catch (e) {
-//       debugPrint("Delete error: $e");
-//     }
-//   }
-
-//   /// MARK AS READ
-//   Future<void> markAsRead(String roomId, String token) async {
-//     try {
-//       await _service.markAsRead(roomId, token);
-//     } catch (e) {
-//       debugPrint("Read error: $e");
-//     }
-//   }
-
-//   Future<void> sendImagesMessage(String roomId, List<File> images, String token) async {
-//     if (images.isEmpty) return;
-//     try {
-//       _isLoading = true;
-//       notifyListeners();
-
-//       final success = await _service.sendImages(roomId, images, token);
-
-//       if (success) {
-//         await Future.delayed(const Duration(milliseconds: 200));
-//         await fetchMessages(roomId, token);
-//       }
-//     } catch (e) {
-//       debugPrint("Images provider failure: $e");
-//     } finally {
-//       _isLoading = false;
-//       notifyListeners();
-//     }
-//   }
-// /// Sends a raw audio recording file directly to the Cloudinary backend structure
-//   Future<void> sendVoiceMessage(String roomId, File audioFile, String token) async {
-//     if (!audioFile.existsSync()) return;
-//     try {
-//       _isLoading = true;
-//       notifyListeners();
-
-//       // 🛠️ CRITICAL FIX: Bypass Base64 translation.
-//       // Pass the audio file directly into the multi-part loader array, 
-//       // exactly like how you process images!
-//       final success = await _service.sendImages(roomId, [audioFile], token);
-
-//       if (success) {
-//         // A short delay gives Cloudinary time to complete processing before fetching fresh logs
-//         await Future.delayed(const Duration(milliseconds: 300));
-//         await fetchMessages(roomId, token);
-//       }
-//     } catch (e) {
-//       debugPrint("Voice file streaming error: $e");
-//     } finally {
-//       _isLoading = false;
-//       notifyListeners();
-//     }
-//   }
-
-// // /// SEND IMAGE MESSAGE (With Instant UI Update)
-// //   Future<void> sendImagesMessage(String roomId, List<File> images, String token) async {
-// //     if (images.isEmpty) return;
-    
-// //     // Create temporary local versions to show instantly in the UI
-// //     final List<Map<String, dynamic>> tempMessages = [];
-// //     final String timestamp = DateTime.now().toIso8601String();
-
-// //     for (File file in images) {
-// //       final String tempId = "temp_${DateTime.now().microsecondsSinceEpoch}_${file.path.hashCode}";
-// //       tempMessages.add({
-// //         "_id": tempId,
-// //         "roomId": roomId,
-// //         "messageType": "image",
-// //         "text": "Sending image...",
-// //         "fileUrl": file.path, // Use local path to preview immediately if UI supports it
-// //         "createdAt": timestamp,
-// //         "isSender": true, // Adjust this key name to match your API model layout
-// //         "isTemp": true,   // Flag to show a loading spinner on the individual bubble if wanted
-// //       });
-// //     }
-
-// //     try {
-// //       // 1. Instantly inject into memory and refresh the UI screen
-// //       _messages.addAll(tempMessages);
-// //       notifyListeners();
-
-// //       // 2. Fire off the upload in the background (No _isLoading blocking the whole screen)
-// //       final success = await _service.sendImages(roomId, images, token);
-
-// //       if (success) {
-// //         // Fetch fresh database copies once server completes sync
-// //         final updated = await _service.getMessages(roomId, token);
-// //         _messages = updated ?? [];
-// //       } else {
-// //         // If it fails, remove the temporary messages from the screen
-// //         _messages.removeWhere((msg) => tempMessages.any((temp) => temp["_id"] == msg["_id"]));
-// //       }
-// //     } catch (e) {
-// //       debugPrint("Images provider failure: $e");
-// //       _messages.removeWhere((msg) => tempMessages.any((temp) => temp["_id"] == msg["_id"]));
-// //     } finally {
-// //       notifyListeners();
-// //     }
-// //   }
-
-// //   /// SEND VOICE MESSAGE (With Instant UI Update)
-// //   Future<void> sendVoiceMessage(String roomId, File audioFile, String token) async {
-// //     if (!audioFile.existsSync()) return;
-
-// //     // Create a temporary local message layout
-// //     final String tempId = "temp_${DateTime.now().microsecondsSinceEpoch}";
-// //     final Map<String, dynamic> tempVoice = {
-// //       "_id": tempId,
-// //       "roomId": roomId,
-// //       "messageType": "audio",
-// //       "text": "Voice message",
-// //       "fileUrl": audioFile.path,
-// //       "createdAt": DateTime.now().toIso8601String(),
-// //       "isSender": true,
-// //       "isTemp": true,
-// //     };
-
-// //     try {
-// //       // 1. Show it on the screen immediately
-// //       _messages.add(tempVoice);
-// //       notifyListeners();
-
-// //       // 2. Execute background upload
-// //       final success = await _service.sendImages(roomId, [audioFile], token);
-
-// //       if (success) {
-// //         final updated = await _service.getMessages(roomId, token);
-// //         _messages = updated ?? [];
-// //       } else {
-// //         _messages.removeWhere((msg) => msg["_id"] == tempId);
-// //       }
-// //     } catch (e) {
-// //       debugPrint("Voice file streaming error: $e");
-// //       _messages.removeWhere((msg) => msg["_id"] == tempId);
-// //     } finally {
-// //       notifyListeners();
-// //     }
-// //   }
-//   }import 'dart:io';
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:zindaonlineschool/services/chat_service.dart';
@@ -288,6 +17,9 @@ class ChatProvider with ChangeNotifier {
 
   List<dynamic> _messages = [];
   List<dynamic> get messages => _messages;
+
+  bool _isLoadingMessages = false;
+bool get isLoadingMessages => _isLoadingMessages;
 
 
   List<dynamic> _assignedTutors = [];
@@ -346,16 +78,32 @@ bool get isLoadingAssignedTutors => _isLoadingAssignedTutors;
   }
 
   /// GET MESSAGES
-  Future<void> fetchMessages(String roomId, String token) async {
-    try {
-      final res = await _service.getMessages(roomId, token);
-      _messages = res ?? [];
-      notifyListeners();
-    } catch (e) {
-      debugPrint("Message error: $e");
-    }
-  }
+  // Future<void> fetchMessages(String roomId, String token) async {
+  //   try {
+  //     final res = await _service.getMessages(roomId, token);
+  //     _messages = res ?? [];
+  //     notifyListeners();
+  //   } catch (e) {
+  //     debugPrint("Message error: $e");
+  //   }
+  // }
 
+/// GET MESSAGES
+Future<void> fetchMessages(String roomId, String token) async {
+  try {
+    _isLoadingMessages = true;
+    _messages = [];
+    notifyListeners();
+
+    final res = await _service.getMessages(roomId, token);
+    _messages = res ?? [];
+  } catch (e) {
+    debugPrint("Message error: $e");
+  } finally {
+    _isLoadingMessages = false;
+    notifyListeners();
+  }
+}
   /// SEND MESSAGE
   Future<void> sendMessage(String roomId, String message, String token) async {
     try {
@@ -394,25 +142,7 @@ bool get isLoadingAssignedTutors => _isLoadingAssignedTutors;
   }
 
 
-Future<void> deleteSingleAttachment(String messageId, int fileIndex, String roomId, String token) async {
-  try {
-    // 1. Perform your actual API call here
-    // final response = await apiService.deleteAttachment(...);
 
-    // 2. IMPORTANT: Update the local list so the UI knows the data changed
-    // Assuming your message object is stored in a list inside this provider:
-    final message = _messages.firstWhere((m) => m["_id"] == messageId);
-    if (message["files"] != null) {
-      (message["files"] as List).removeAt(fileIndex);
-    }
-
-    // 3. This tells Flutter to rebuild the UI
-    notifyListeners(); 
-    
-  } catch (e) {
-    debugPrint("Delete error: $e");
-  }
-}
 
   /// MARK AS READ
   Future<void> markAsRead(String roomId, String token) async {

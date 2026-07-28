@@ -32,10 +32,10 @@ class _CoursesScreenState extends State<CoursesScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      // ignore: use_build_context_synchronously
-      context.read<CourseProvider>().fetchCourses(widget.categoryId);
-    });
+  Future.microtask(() {
+  if (!mounted) return;
+  context.read<CourseProvider>().fetchCourses(widget.categoryId);
+});
   }
 
   @override
@@ -212,11 +212,10 @@ class _CoursesScreenState extends State<CoursesScreen> {
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                // ignore: deprecated_member_use
-                color: Colors.black.withOpacity(0.22),
-                blurRadius: 14,
-                offset: const Offset(0, 6),
-              ),
+  color: Colors.black.withValues(alpha: 0.22),
+  blurRadius: 14,
+  offset: const Offset(0, 6),
+),
             ],
           ),
           child: Padding(
