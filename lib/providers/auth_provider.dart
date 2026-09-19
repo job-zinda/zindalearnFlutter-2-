@@ -64,7 +64,8 @@ Future<(bool, dynamic)> login({
     res["token"],
   );
 
-
+print("NEW LOGIN TOKEN SAVED");
+print("TOKEN LENGTH: ${res["token"].toString().length}");
 
   // print("student = ${res["student"]}");
   // print("user = ${res["user"]}");

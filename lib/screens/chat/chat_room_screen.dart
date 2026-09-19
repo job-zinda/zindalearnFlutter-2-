@@ -195,10 +195,7 @@ Future<void> _downloadVoiceNote(String url) async {
     await Dio().download(url, tempPath);
     if (!mounted) return;
 
-    // Hand the file to the native share sheet so the user can pick
-    // exactly where it goes — Downloads, Files, Drive, WhatsApp, etc.
-    // This is the standard, permission-free way to deliver a real,
-    // user-visible file on modern Android/iOS.
+   
     await Share.shareXFiles(
       [XFile(tempPath)],
       text: "Voice note",

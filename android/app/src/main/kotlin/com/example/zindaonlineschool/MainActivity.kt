@@ -1,4 +1,4 @@
-package com.example.zindaonlineschool
+package apps.zindaonlineschool.com
 
 import io.flutter.embedding.android.FlutterActivity
 

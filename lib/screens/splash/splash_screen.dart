@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zindaonlineschool/screens/auth/login_screen.dart';
 import 'package:zindaonlineschool/screens/dashboard/dashborad_screen.dart';
 import 'package:zindaonlineschool/core/utils/responsive.dart';
+import 'package:zindaonlineschool/services/token_service.dart';
 import 'package:zindaonlineschool/widgets/responsive_body.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
@@ -20,39 +21,127 @@ class _SplashScreenState extends State<SplashScreen> {
     checkLogin();
   }
 
-  Future<void> checkLogin() async {
-    final stopwatch = Stopwatch()..start();
+  // Future<void> checkLogin() async {
+  //   final stopwatch = Stopwatch()..start();
 
-    String? token;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      token = prefs.getString("token");
-    } catch (e) {
-      debugPrint("SharedPreferences error: $e");
+  //   String? token;
+  //   try {
+  //     final prefs = await SharedPreferences.getInstance();
+  //     token = prefs.getString("token");
+  //   } catch (e) {
+  //     debugPrint("SharedPreferences error: $e");
+  //   }
+
+  //   // Ensure the splash is visible for at least 2 seconds, even if the
+  //   // token check finishes instantly.
+  //   const minSplashDuration = Duration(seconds: 2);
+  //   final elapsed = stopwatch.elapsed;
+  //   if (elapsed < minSplashDuration) {
+  //     await Future.delayed(minSplashDuration - elapsed);
+  //   }
+
+  //   if (!mounted) return;
+
+  //   if (token != null) {
+  //     Navigator.pushReplacement(
+  //       context,
+  //       MaterialPageRoute(builder: (_) => DashboardScreen(token: token!)),
+  //     );
+  //   } else {
+  //     Navigator.pushReplacement(
+  //       context,
+  //       MaterialPageRoute(builder: (_) => const LoginScreen()),
+  //     );
+  //   }
+  // }
+Future<void> checkLogin() async {
+  final stopwatch = Stopwatch()..start();
+
+  String? token;
+
+  try {
+    final prefs = await SharedPreferences.getInstance();
+
+    token = prefs.getString("token");
+
+    debugPrint("================================");
+    debugPrint("SPLASH TOKEN CHECK");
+    debugPrint(
+      "TOKEN EXISTS: ${token != null && token!.isNotEmpty}",
+    );
+
+    if (token != null && token!.isNotEmpty) {
+      final expired = TokenService.isTokenExpired(token!);
+
+      debugPrint("TOKEN EXPIRED: $expired");
+
+      if (expired) {
+        debugPrint("❌ TOKEN EXPIRED");
+        debugPrint("CLEARING OLD TOKEN");
+
+        await prefs.remove("token");
+        await prefs.remove("userId");
+
+        token = null;
+
+        debugPrint("OLD TOKEN REMOVED");
+      } else {
+        debugPrint("✅ TOKEN IS VALID");
+
+        final remaining =
+            TokenService.getRemainingTime(token!);
+
+        if (remaining != null) {
+          debugPrint(
+            "TOKEN REMAINING: "
+            "${remaining.inHours}h "
+            "${remaining.inMinutes.remainder(60)}m",
+          );
+        }
+      }
     }
 
-    // Ensure the splash is visible for at least 2 seconds, even if the
-    // token check finishes instantly.
-    const minSplashDuration = Duration(seconds: 2);
-    final elapsed = stopwatch.elapsed;
-    if (elapsed < minSplashDuration) {
-      await Future.delayed(minSplashDuration - elapsed);
-    }
+    debugPrint("================================");
+  } catch (e) {
+    debugPrint("SharedPreferences / Token error: $e");
 
-    if (!mounted) return;
-
-    if (token != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => DashboardScreen(token: token!)),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
-    }
+    token = null;
   }
+
+  const minSplashDuration = Duration(seconds: 2);
+
+  final elapsed = stopwatch.elapsed;
+
+  if (elapsed < minSplashDuration) {
+    await Future.delayed(
+      minSplashDuration - elapsed,
+    );
+  }
+
+  if (!mounted) return;
+
+  if (token != null && token!.isNotEmpty) {
+    debugPrint("➡️ Opening Dashboard");
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DashboardScreen(
+          token: token!,
+        ),
+      ),
+    );
+  } else {
+    debugPrint("➡️ Opening Login");
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const LoginScreen(),
+      ),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {

@@ -449,7 +449,25 @@ Future<Map<String, dynamic>> getTutorDetails(
 
   throw Exception("Failed to load tutor details");
 }
-Future<List<dynamic>> getTutors(String? courseId, String token) async {
+// Future<List<dynamic>> getTutors(String? courseId, String token) async {
+//   final url = courseId == null || courseId.isEmpty
+//       ? "$baseUrl/tuter/all"
+//       : "$baseUrl/tuter/by-course/$courseId";
+
+//   final response = await AppHttp.get(
+//     Uri.parse(url),
+//     headers: {
+//       "Authorization": "Bearer $token",
+//     },
+//   );
+
+//   return jsonDecode(response.body)["tuters"];
+// }
+
+Future<List<dynamic>> getTutors(
+  String? courseId,
+  String token,
+) async {
   final url = courseId == null || courseId.isEmpty
       ? "$baseUrl/tuter/all"
       : "$baseUrl/tuter/by-course/$courseId";
@@ -457,11 +475,31 @@ Future<List<dynamic>> getTutors(String? courseId, String token) async {
   final response = await AppHttp.get(
     Uri.parse(url),
     headers: {
-      "Authorization": "Bearer $token",
+      "Authorization": "Bearer ${token.trim()}",
+      "Content-Type": "application/json",
     },
   );
 
-  return jsonDecode(response.body)["tuters"];
+  debugPrint("================================");
+  debugPrint("TUTOR API URL: $url");
+  debugPrint("TUTOR API STATUS: ${response.statusCode}");
+  debugPrint("TUTOR API RESPONSE: ${response.body}");
+  debugPrint("================================");
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+
+    return data["tuters"] ?? [];
+  }
+
+  if (response.statusCode == 401) {
+    debugPrint("❌ TUTOR API: TOKEN UNAUTHORIZED");
+    throw Exception("Unauthorized - token is invalid or expired");
+  }
+
+  throw Exception(
+    "Failed to load tutors: ${response.statusCode}",
+  );
 }
 
 /// ADD REVIEW
