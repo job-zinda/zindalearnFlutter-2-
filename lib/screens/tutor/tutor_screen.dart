@@ -12,6 +12,397 @@ import '../../models/tutor_model.dart';
 import '../../providers/tutor_provider.dart';
 import '../../widgets/responsive_body.dart';
 
+// class TutorsScreen extends StatefulWidget {
+//   final String courseId;
+//   final String courseTitle;
+//   final String token;
+
+//   const TutorsScreen({
+//     super.key,
+//     required this.courseId,
+//     required this.courseTitle,
+//     required this.token,
+//   });
+
+//   @override
+//   State<TutorsScreen> createState() => _TutorsScreenState();
+// }
+
+// class _TutorsScreenState extends State<TutorsScreen> {
+//   String tutorSearchQuery = "";
+
+//   @override
+//   void initState() {
+//     super.initState();
+
+//     Future.microtask(() {
+//       if (!mounted) return;
+
+//       // If courseId is empty string, convert to null for 'All Tutors' API structure
+//       final String? cleanCourseId = widget.courseId.isEmpty
+//           ? null
+//           : widget.courseId;
+
+//       context.read<TutorProvider>().fetchTutors(cleanCourseId, widget.token);
+//        context.read<ChatProvider>().fetchAssignedTutors(widget.token); 
+//     });
+//   }
+
+//   double getAverageRating(List reviews) {
+//     if (reviews.isEmpty) return 0;
+
+//     double total = 0;
+//     int count = 0;
+
+//     for (var review in reviews) {
+//       if (review["rating"] != null) {
+//         total += review["rating"].toDouble();
+//         count++;
+//       }
+//     }
+
+//     return count == 0 ? 0 : total / count;
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final provider = context.watch<TutorProvider>();
+//   final chatProvider = context.watch<ChatProvider>();
+// final assignedTutors = chatProvider.assignedTutors;
+
+//     // 2. Filter tutors list locally based on search query match
+//     final filteredTutors = provider.tutors.where((tutor) {
+//       return tutor.name.toLowerCase().contains(tutorSearchQuery.toLowerCase());
+//     }).toList();
+
+//     return Scaffold(
+//       backgroundColor: AppColors.background,
+
+//       appBar: AppBar(
+//         backgroundColor: AppColors.background,
+
+//         elevation: 0,
+
+//         centerTitle: true,
+
+//         title: Text(
+//           widget.courseTitle,
+
+//           style: AppTextStyles.subHeading.copyWith(
+//             fontSize: Responsive.fontSize(context, 0.05, min: 16, max: 22),
+//           ),
+//         ),
+//       ),
+
+//       body: ResponsiveBody(
+//         padding: EdgeInsets.symmetric(
+//           horizontal: Responsive.screenPadding(context).left,
+//         ),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             //  CustomSearchBar at the top of the body layout stack
+//             const SizedBox(height: 12),
+//             CustomSearchBar(
+//               hintText: "Search tutors by name...",
+//               onChanged: (value) {
+//                 setState(() {
+//                   tutorSearchQuery =
+//                       value; // Triggers instant filtering refresh
+//                 });
+//               },
+//             ),
+//             SizedBox(height: Responsive.spacing(context, 0.025)),
+//           if (assignedTutors.isNotEmpty) ...[
+//   Text("My Tutors", style: AppTextStyles.subHeading),
+//   SizedBox(height: Responsive.spacing(context, 0.015)),
+//   SizedBox(
+//     height: 128,
+//     child: ListView.separated(
+//       scrollDirection: Axis.horizontal,
+//       itemCount: assignedTutors.length,
+//       separatorBuilder: (_, __) => const SizedBox(width: 12),
+//       itemBuilder: (context, index) =>
+//           _buildAssignedTutorCard(context, assignedTutors[index]),
+//     ),
+//   ),
+//   SizedBox(height: Responsive.spacing(context, 0.02)),
+//   const Divider(color: Colors.white24, height: 1),
+//   SizedBox(height: Responsive.spacing(context, 0.02)),
+// ],
+//             // 4. Wrap list/grid views in an Expanded widget area
+//             Expanded(
+//               child: provider.isLoading && provider.tutors.isEmpty
+//                   ? const Center(child: CircularProgressIndicator())
+//                   : filteredTutors.isEmpty
+//                   ? const Center(
+//                       child: Text(
+//                         "No Tutors Found",
+//                         style: TextStyle(color: Colors.white70),
+//                       ),
+//                     )
+//                   : _buildTutorsList(context, filteredTutors),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   // Widget _buildTutorsList(BuildContext context, TutorProvider provider) {
+//   Widget _buildTutorsList(BuildContext context, List<TutorModel> tutorsList) {
+//     final columns = Responsive.gridColumns(context);
+//     // final padding = Responsive.screenPadding(context);
+
+//     if (columns == 1) {
+//       return ListView.separated(
+//         padding: const EdgeInsets.symmetric(vertical: 8),
+//         itemCount: tutorsList.length,
+//         separatorBuilder: (_, _) =>
+//             SizedBox(height: Responsive.spacing(context, 0.025)),
+//         itemBuilder: (context, index) =>
+//             _buildTutorCard(context, tutorsList[index]),
+//       );
+//     }
+
+//     return GridView.builder(
+//       padding: const EdgeInsets.symmetric(vertical: 8),
+//       itemCount: tutorsList.length,
+//       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+//         crossAxisCount: columns,
+//         crossAxisSpacing: 16,
+//         mainAxisSpacing: 16,
+//         childAspectRatio: Responsive.value(
+//           context,
+//           mobile: 0.85,
+//           tablet: 0.72,
+//           desktop: 0.78,
+//         ),
+//       ),
+//       itemBuilder: (context, index) =>
+//           _buildTutorCard(context, tutorsList[index]),
+//     );
+//   }
+
+//   String _formatName(String name) {
+//     return name
+//         .split(' ')
+//         .map(
+//           (word) => word.isNotEmpty
+//               ? '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}'
+//               : '',
+//         )
+//         .join(' ');
+//   }
+
+//   Widget _buildTutorCard(BuildContext context, TutorModel tutor) {
+//     final isGrid = Responsive.gridColumns(context) > 1;
+
+//     return LayoutBuilder(
+//       builder: (context, constraints) {
+//         final cardW = constraints.maxWidth;
+//         final avatarR = isGrid ? 32.0 : (cardW * 0.11).clamp(28.0, 48.0);
+//         final nameSize = isGrid ? 14.0 : (cardW * 0.052).clamp(14.0, 20.0);
+//         final bodySize = isGrid ? 12.0 : (cardW * 0.034).clamp(11.0, 15.0);
+
+//         return Container(
+//           decoration: BoxDecoration(
+//             borderRadius: BorderRadius.circular(28),
+//             color: AppColors.cardFill,
+//             boxShadow: [
+//               BoxShadow(
+//                 color: AppColors.black.withValues(alpha: 0.25),
+//                 blurRadius: 15,
+//                 offset: const Offset(0, 8),
+//               ),
+//             ],
+//           ),
+//           child: Padding(
+//             padding: EdgeInsets.all(cardW * 0.045),
+//             child: Column(
+//               mainAxisSize: MainAxisSize.min,
+//               children: [
+//                 Row(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Container(
+//                       padding: const EdgeInsets.all(3),
+//                       decoration: BoxDecoration(
+//                         shape: BoxShape.circle,
+//                         border: Border.all(
+//                           color: AppColors.white.withValues(alpha: 0.24),
+//                           width: 2,
+//                         ),
+//                       ),
+//                       child: CircleAvatar(
+//                         radius: avatarR,
+//                         backgroundColor: AppColors.white,
+//                         backgroundImage: tutor.image.isNotEmpty
+//                             ? CachedNetworkImageProvider(tutor.image)
+//                             : null,
+//                         child: tutor.image.isEmpty
+//                             ? Icon(
+//                                 Icons.person,
+//                                 size: avatarR,
+//                                 color: AppColors.grey,
+//                               )
+//                             : null,
+//                       ),
+//                     ),
+//                     SizedBox(width: cardW * 0.04),
+//                     Expanded(
+//                       child: Column(
+//                         crossAxisAlignment: CrossAxisAlignment.start,
+//                         children: [
+//                           Text(
+//                             _formatName(tutor.name),
+//                             maxLines: isGrid ? 2 : null,
+//                             overflow: TextOverflow.ellipsis,
+//                             style: AppTextStyles.heading.copyWith(
+//                               fontSize: nameSize,
+//                               fontWeight: FontWeight.w900,
+//                             ),
+//                           ),
+//                           const SizedBox(height: 6),
+//                           Row(
+//                             children: [
+//                               const Icon(
+//                                 Icons.star,
+//                                 color: Colors.amber,
+//                                 size: 16,
+//                               ),
+//                               const SizedBox(width: 4),
+//                               Text(
+//                                 getAverageRating(
+//                                   tutor.reviews,
+//                                 ).toStringAsFixed(1),
+//                                 style: AppTextStyles.body.copyWith(
+//                                   color: Colors.white,
+//                                   fontSize: bodySize,
+//                                   fontWeight: FontWeight.bold,
+//                                 ),
+//                               ),
+//                             ],
+//                           ),
+//                         ],
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//                 if (tutor.qualification.isNotEmpty) ...[
+//                   SizedBox(height: Responsive.spacing(context, 0.015)),
+//                   Text(
+//                     tutor.qualification,
+//                     maxLines: isGrid ? 2 : 4,
+//                     overflow: TextOverflow.ellipsis,
+//                     style: AppTextStyles.body.copyWith(
+//                       fontSize: bodySize,
+//                       height: 1.4,
+//                     ),
+//                   ),
+//                 ],
+//                 if (tutor.experience.isNotEmpty && !isGrid) ...[
+//                   SizedBox(height: Responsive.spacing(context, 0.012)),
+//                   Text(
+//                     tutor.experience,
+//                     maxLines: 2,
+//                     overflow: TextOverflow.ellipsis,
+//                     style: AppTextStyles.body.copyWith(
+//                       fontSize: bodySize,
+//                       height: 1.4,
+//                     ),
+//                   ),
+//                 ],
+//                 SizedBox(height: Responsive.spacing(context, 0.018)),
+//                 SizedBox(
+//                   width: double.infinity,
+//                   child: ElevatedButton(
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: const Color(0xFF8B5CF6),
+//                       padding: const EdgeInsets.symmetric(vertical: 12),
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(18),
+//                       ),
+//                     ),
+//                     onPressed: () {
+//                       Navigator.push(
+//                         context,
+//                         MaterialPageRoute(
+//                           builder: (_) => TutorDetailsScreen(
+//                             tutorId: tutor.id,
+//                             token: widget.token,
+//                           ),
+//                         ),
+//                       );
+//                     },
+//                     child: Text('View Profile', style: AppTextStyles.button),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+// Widget _buildAssignedTutorCard(BuildContext context, dynamic tutor) {
+//   final String tutorId =
+//       (tutor["_id"] ?? tutor["id"] ?? tutor["tuterId"] ?? tutor["tutorId"] ?? "")
+//           .toString();
+//   final String name = (tutor["name"] ?? "Tutor").toString();
+//   final String image = (tutor["photo"] ?? tutor["image"] ?? "").toString();
+
+//   return GestureDetector(
+//     onTap: () {
+//       if (tutorId.isEmpty) return;
+//       Navigator.push(
+//         context,
+//         MaterialPageRoute(
+//           builder: (_) => TutorDetailsScreen(tutorId: tutorId, token: widget.token),
+//         ),
+//       );
+//     },
+//     child: Container(
+//       width: 96,
+//       padding: const EdgeInsets.all(10),
+//       decoration: BoxDecoration(
+//         color: AppColors.cardFill,
+//         borderRadius: BorderRadius.circular(18),
+//         border: Border.all(color: const Color(0xFF8B5CF6), width: 1.4),
+//       ),
+//       child: Column(
+//         mainAxisSize: MainAxisSize.min,
+//         children: [
+//           CircleAvatar(
+//             radius: 28,
+//             backgroundColor: AppColors.white,
+//             backgroundImage: image.isNotEmpty
+//                 ? CachedNetworkImageProvider(image)
+//                 : null,
+//             child: image.isEmpty
+//                 ? const Icon(Icons.person, color: AppColors.grey)
+//                 : null,
+//           ),
+//           const SizedBox(height: 8),
+//           Text(
+//             _formatName(name),
+//             maxLines: 1,
+//             overflow: TextOverflow.ellipsis,
+//             textAlign: TextAlign.center,
+//             style: AppTextStyles.small.copyWith(
+//               color: Colors.white,
+//               fontWeight: FontWeight.bold,
+//               fontSize: 11,
+//             ),
+//           ),
+//         ],
+//       ),
+//     ),
+//   );
+// }
+
+// }
 class TutorsScreen extends StatefulWidget {
   final String courseId;
   final String courseTitle;
@@ -44,7 +435,7 @@ class _TutorsScreenState extends State<TutorsScreen> {
           : widget.courseId;
 
       context.read<TutorProvider>().fetchTutors(cleanCourseId, widget.token);
-       context.read<ChatProvider>().fetchAssignedTutors(widget.token); 
+      context.read<ChatProvider>().fetchAssignedTutors(widget.token); 
     });
   }
 
@@ -67,10 +458,10 @@ class _TutorsScreenState extends State<TutorsScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<TutorProvider>();
-  final chatProvider = context.watch<ChatProvider>();
-final assignedTutors = chatProvider.assignedTutors;
+    final chatProvider = context.watch<ChatProvider>();
+    final assignedTutors = chatProvider.assignedTutors;
 
-    // 2. Filter tutors list locally based on search query match
+    // Filter tutors list locally based on search query match
     final filteredTutors = provider.tutors.where((tutor) {
       return tutor.name.toLowerCase().contains(tutorSearchQuery.toLowerCase());
     }).toList();
@@ -80,14 +471,10 @@ final assignedTutors = chatProvider.assignedTutors;
 
       appBar: AppBar(
         backgroundColor: AppColors.background,
-
         elevation: 0,
-
         centerTitle: true,
-
         title: Text(
           widget.courseTitle,
-
           style: AppTextStyles.subHeading.copyWith(
             fontSize: Responsive.fontSize(context, 0.05, min: 16, max: 22),
           ),
@@ -101,36 +488,33 @@ final assignedTutors = chatProvider.assignedTutors;
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            //  CustomSearchBar at the top of the body layout stack
             const SizedBox(height: 12),
             CustomSearchBar(
               hintText: "Search tutors by name...",
               onChanged: (value) {
                 setState(() {
-                  tutorSearchQuery =
-                      value; // Triggers instant filtering refresh
+                  tutorSearchQuery = value; // Triggers instant filtering refresh
                 });
               },
             ),
             SizedBox(height: Responsive.spacing(context, 0.025)),
-          if (assignedTutors.isNotEmpty) ...[
-  Text("My Tutors", style: AppTextStyles.subHeading),
-  SizedBox(height: Responsive.spacing(context, 0.015)),
-  SizedBox(
-    height: 128,
-    child: ListView.separated(
-      scrollDirection: Axis.horizontal,
-      itemCount: assignedTutors.length,
-      separatorBuilder: (_, __) => const SizedBox(width: 12),
-      itemBuilder: (context, index) =>
-          _buildAssignedTutorCard(context, assignedTutors[index]),
-    ),
-  ),
-  SizedBox(height: Responsive.spacing(context, 0.02)),
-  const Divider(color: Colors.white24, height: 1),
-  SizedBox(height: Responsive.spacing(context, 0.02)),
-],
-            // 4. Wrap list/grid views in an Expanded widget area
+            if (assignedTutors.isNotEmpty) ...[
+              Text("My Tutors", style: AppTextStyles.subHeading),
+              SizedBox(height: Responsive.spacing(context, 0.015)),
+              SizedBox(
+                height: 128,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: assignedTutors.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) =>
+                      _buildAssignedTutorCard(context, assignedTutors[index]),
+                ),
+              ),
+              SizedBox(height: Responsive.spacing(context, 0.02)),
+              const Divider(color: Colors.white24, height: 1),
+              SizedBox(height: Responsive.spacing(context, 0.02)),
+            ],
             Expanded(
               child: provider.isLoading && provider.tutors.isEmpty
                   ? const Center(child: CircularProgressIndicator())
@@ -149,34 +533,28 @@ final assignedTutors = chatProvider.assignedTutors;
     );
   }
 
-  // Widget _buildTutorsList(BuildContext context, TutorProvider provider) {
   Widget _buildTutorsList(BuildContext context, List<TutorModel> tutorsList) {
-    final columns = Responsive.gridColumns(context);
-    // final padding = Responsive.screenPadding(context);
-
-    if (columns == 1) {
-      return ListView.separated(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: tutorsList.length,
-        separatorBuilder: (_, _) =>
-            SizedBox(height: Responsive.spacing(context, 0.025)),
-        itemBuilder: (context, index) =>
-            _buildTutorCard(context, tutorsList[index]),
-      );
-    }
+    // Determine column count based on screen size (Default 2 for mobile grid)
+    final int crossAxisCount = Responsive.value(
+      context,
+      mobile: 2,
+      tablet: 3,
+      desktop: 4,
+    );
 
     return GridView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: tutorsList.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: columns,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        // Height to width ratio of grid items
         childAspectRatio: Responsive.value(
           context,
-          mobile: 0.85,
-          tablet: 0.72,
-          desktop: 0.78,
+          mobile: 0.62,
+          tablet: 0.70,
+          desktop: 0.75,
         ),
       ),
       itemBuilder: (context, index) =>
@@ -196,42 +574,39 @@ final assignedTutors = chatProvider.assignedTutors;
   }
 
   Widget _buildTutorCard(BuildContext context, TutorModel tutor) {
-    final isGrid = Responsive.gridColumns(context) > 1;
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final cardW = constraints.maxWidth;
-        final avatarR = isGrid ? 32.0 : (cardW * 0.11).clamp(28.0, 48.0);
-        final nameSize = isGrid ? 14.0 : (cardW * 0.052).clamp(14.0, 20.0);
-        final bodySize = isGrid ? 12.0 : (cardW * 0.034).clamp(11.0, 15.0);
+        final avatarR = (cardW * 0.18).clamp(24.0, 36.0);
+        final nameSize = (cardW * 0.08).clamp(13.0, 16.0);
+        final bodySize = (cardW * 0.065).clamp(10.0, 13.0);
 
         return Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(20),
             color: AppColors.cardFill,
             boxShadow: [
               BoxShadow(
                 color: AppColors.black.withValues(alpha: 0.25),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: Padding(
-            padding: EdgeInsets.all(cardW * 0.045),
+            padding: const EdgeInsets.all(10),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(3),
+                      padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: AppColors.white.withValues(alpha: 0.24),
-                          width: 2,
+                          width: 1.5,
                         ),
                       ),
                       child: CircleAvatar(
@@ -249,79 +624,62 @@ final assignedTutors = chatProvider.assignedTutors;
                             : null,
                       ),
                     ),
-                    SizedBox(width: cardW * 0.04),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _formatName(tutor.name),
-                            maxLines: isGrid ? 2 : null,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.heading.copyWith(
-                              fontSize: nameSize,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                color: Colors.amber,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                getAverageRating(
-                                  tutor.reviews,
-                                ).toStringAsFixed(1),
-                                style: AppTextStyles.body.copyWith(
-                                  color: Colors.white,
-                                  fontSize: bodySize,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                    const SizedBox(height: 8),
+                    Text(
+                      _formatName(tutor.name),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.heading.copyWith(
+                        fontSize: nameSize,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          getAverageRating(
+                            tutor.reviews,
+                          ).toStringAsFixed(1),
+                          style: AppTextStyles.body.copyWith(
+                            color: Colors.white,
+                            fontSize: bodySize,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (tutor.qualification.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        tutor.qualification,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.body.copyWith(
+                          fontSize: bodySize,
+                          height: 1.2,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
-                if (tutor.qualification.isNotEmpty) ...[
-                  SizedBox(height: Responsive.spacing(context, 0.015)),
-                  Text(
-                    tutor.qualification,
-                    maxLines: isGrid ? 2 : 4,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.body.copyWith(
-                      fontSize: bodySize,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-                if (tutor.experience.isNotEmpty && !isGrid) ...[
-                  SizedBox(height: Responsive.spacing(context, 0.012)),
-                  Text(
-                    tutor.experience,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.body.copyWith(
-                      fontSize: bodySize,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-                SizedBox(height: Responsive.spacing(context, 0.018)),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF8B5CF6),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                     onPressed: () {
@@ -335,7 +693,10 @@ final assignedTutors = chatProvider.assignedTutors;
                         ),
                       );
                     },
-                    child: Text('View Profile', style: AppTextStyles.button),
+                    child: Text(
+                      'View Profile',
+                      style: AppTextStyles.button.copyWith(fontSize: bodySize),
+                    ),
                   ),
                 ),
               ],
@@ -346,60 +707,59 @@ final assignedTutors = chatProvider.assignedTutors;
     );
   }
 
-Widget _buildAssignedTutorCard(BuildContext context, dynamic tutor) {
-  final String tutorId =
-      (tutor["_id"] ?? tutor["id"] ?? tutor["tuterId"] ?? tutor["tutorId"] ?? "")
-          .toString();
-  final String name = (tutor["name"] ?? "Tutor").toString();
-  final String image = (tutor["photo"] ?? tutor["image"] ?? "").toString();
+  Widget _buildAssignedTutorCard(BuildContext context, dynamic tutor) {
+    final String tutorId =
+        (tutor["_id"] ?? tutor["id"] ?? tutor["tuterId"] ?? tutor["tutorId"] ?? "")
+            .toString();
+    final String name = (tutor["name"] ?? "Tutor").toString();
+    final String image = (tutor["photo"] ?? tutor["image"] ?? "").toString();
 
-  return GestureDetector(
-    onTap: () {
-      if (tutorId.isEmpty) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => TutorDetailsScreen(tutorId: tutorId, token: widget.token),
+    return GestureDetector(
+      onTap: () {
+        if (tutorId.isEmpty) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => TutorDetailsScreen(tutorId: tutorId, token: widget.token),
+          ),
+        );
+      },
+      child: Container(
+        width: 96,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppColors.cardFill,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFF8B5CF6), width: 1.4),
         ),
-      );
-    },
-    child: Container(
-      width: 96,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: AppColors.cardFill,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF8B5CF6), width: 1.4),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: AppColors.white,
-            backgroundImage: image.isNotEmpty
-                ? CachedNetworkImageProvider(image)
-                : null,
-            child: image.isEmpty
-                ? const Icon(Icons.person, color: AppColors.grey)
-                : null,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _formatName(name),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.small.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 11,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: AppColors.white,
+              backgroundImage: image.isNotEmpty
+                  ? CachedNetworkImageProvider(image)
+                  : null,
+              child: image.isEmpty
+                  ? const Icon(Icons.person, color: AppColors.grey)
+                  : null,
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              _formatName(name),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.small.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }
